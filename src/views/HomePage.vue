@@ -1,7 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router'; 
-
 import homeCoffee from '/home-coffee.png';
 import aboutCoffee from '/about-coffee.png';
 import tinatangi from '/Tinatangi.jpg';
@@ -10,28 +8,10 @@ import hbsb from '/HBSB.jpg';
 import bfc from '/bfc.jpg';
 
 const router = useRouter(); 
-
 const goToLogin = () => {
   router.push({ name: 'login' }); 
 };
 
-// Search query
-const searchQuery = ref('');
-
-// Café list
-const cafes = ref([
-  { name: 'Tinatangi Cafe', image: tinatangi, route: '/tinatangi' },
-  { name: 'Someday Brews', image: somedays, route: '/someday-brews' },
-  { name: 'He Brews She Bakes', image: hbsb, route: '/he-brews-she-bakes' },
-  { name: 'But First Coffee', image: bfc, route: '/but-first-coffee' }
-]);
-
-// Computed property for filtering
-const filteredCafes = computed(() => {
-  return cafes.value.filter(cafe =>
-    cafe.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
 </script>
 
 <template>
@@ -44,8 +24,8 @@ const filteredCafes = computed(() => {
         <!-- Logo -->
         <img :src="logo" alt="Logo" class="h-12">
 
-        <!-- Navigation -->
-        <div class="hidden space-x-6 text-lg md:flex">
+       <!-- Navigation -->
+       <div class="hidden space-x-6 text-lg md:flex">
           <a href="#" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Home</a>
           <a href="#cafe-directory" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Café Directory</a>
           <a href="#menu" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Menu</a>
@@ -54,12 +34,7 @@ const filteredCafes = computed(() => {
 
         <!-- Search Bar -->
         <div class="relative">
-          <input 
-            v-model="searchQuery" 
-            type="text" 
-            placeholder="Search cafés..." 
-            class="px-4 py-2 text-sm border rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]"
-          >
+          <input type="text" placeholder="Search" class="px-4 py-2 text-sm border rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]">
         </div>
       </div>
     </nav>
@@ -78,23 +53,28 @@ const filteredCafes = computed(() => {
     <section id="cafe-directory" class="py-24 bg-[#f8f5f0]">
       <div class="max-w-6xl mx-auto text-center">
         <h2 class="mb-20 text-4xl font-bold text-[#5B3926]">Café Directory</h2>
-        
-        <div v-if="filteredCafes.length === 0" class="text-xl font-semibold text-gray-500">No cafés found.</div>
-        
         <div class="grid items-center grid-cols-1 gap-6 md:grid-cols-4">
-          <div 
-            v-for="cafe in filteredCafes" 
-            :key="cafe.name" 
-            class="flex flex-col items-center transition duration-300 transform hover:scale-105"
-          >
-            <img :src="cafe.image" :alt="cafe.name" class="object-cover rounded-lg shadow-lg w-60 h-60">
-            <button 
-              @click="router.push(cafe.route)" 
-              class="mt-4 px-6 py-2 text-white bg-[#5B3926] rounded-full hover:bg-[#A67C52] text-lg shadow-md transition duration-300"
-            >
-              Visit Now
-            </button>
+
+          <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
+            <img :src="tinatangi" alt="Tinatangi Cafe" class="object-cover rounded-lg shadow-lg w-60 h-60">
+            <button @click="router.push('/tinatangi')" class="mt-4 px-6 py-2 text-white bg-[#5B3926] rounded-full hover:bg-[#A67C52] text-lg shadow-md transition duration-300">Visit Now</button>
           </div>
+
+          <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
+            <img :src="somedays" alt="Someday Brews" class="object-cover rounded-lg shadow-lg w-60 h-60">
+            <button @click="router.push('/someday-brews')" class="mt-4 px-6 py-2 text-white bg-[#003366] rounded-full hover:bg-[#002244] text-lg shadow-md transition duration-300">Visit Now</button>
+          </div>
+
+          <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
+            <img :src="hbsb" alt="He Brews She Bakes" class="object-cover rounded-lg shadow-xl w-60 h-60">
+            <button @click="router.push('/he-brews-she-bakes')" class="mt-4 px-6 py-2 text-[#5B3926] bg-[#F8F5F0] border border-[#5B3926] rounded-full hover:bg-[#E3D5C5] text-lg shadow-md transition duration-300">Visit Now</button>
+          </div>
+
+          <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
+            <img :src="bfc" alt="But First Coffee" class="object-cover rounded-lg shadow-lg w-60 h-60">
+            <button @click="router.push('/but-first-coffee')" class="px-6 py-2 mt-4 text-lg text-white transition duration-300 bg-black rounded-full shadow-md hover:bg-gray-800">Visit Now</button>
+          </div>
+          
         </div>
       </div>
     </section>
@@ -104,9 +84,7 @@ const filteredCafes = computed(() => {
       <div class="flex flex-col items-center max-w-6xl mx-auto md:flex-row">
         <div class="px-6 md:w-1/2">
           <h2 class="mb-6 text-4xl font-bold">About Us</h2>
-          <p class="text-lg font-medium">
-            Bean There is all about celebrating the vibrant café culture in Dasmariñas, Cavite, making it easier for people to discover and support local coffee spots.
-          </p>
+          <p class="text-lg font-medium">Bean There is all about celebrating the vibrant café culture in Dasmariñas, Cavite, making it easier for people to discover and support local coffee spots. We believe every café has a story to tell, from the cozy corners perfect for deep conversations to the carefully crafted brews that keep us coming back. By shining a light on these hidden gems, we’re not just promoting great coffee—we’re building connections, supporting small businesses, and creating a space where everyone can experience the magic of a good café.</p>
         </div>
         <div class="px-6 mt-6 md:w-1/2 md:mt-0 animate-float">
           <img :src="aboutCoffee" alt="About Coffee">
@@ -114,8 +92,8 @@ const filteredCafes = computed(() => {
       </div>
     </section>
 
-    <!-- Feedback Section -->
-    <section class="py-16 bg-[#F8F5F0] text-center">
+   <!-- Feedback Section -->
+   <section class="py-16 bg-[#F8F5F0] text-center">
       <div class="max-w-6xl mx-auto">
         <h2 class="mb-6 text-4xl font-bold text-[#5B3926]">Feedbacks</h2>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
@@ -130,6 +108,7 @@ const filteredCafes = computed(() => {
   </div>
 </template>
 
+
 <style scoped>
 @keyframes float {
   0% { transform: translateY(0px); }
@@ -141,3 +120,4 @@ const filteredCafes = computed(() => {
   animation: float 3s ease-in-out infinite;
 }
 </style>
+
