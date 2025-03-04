@@ -16,13 +16,6 @@ const goToLogin = () => {
   router.push({ name: 'login' });
 };
 
-const goToProfile = () => {
-  if (isAuthenticated.value) {
-    router.push({ name: 'profile' });
-  } else {
-    goToLogin();
-  }
-};
 </script>
 
 <template>
@@ -42,24 +35,12 @@ const goToProfile = () => {
           <a href="#menu" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">Menu</a>
           <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">About</a>
         </div>
-        
-        <!-- ✅ Search & Profile Section -->
-        <div class="flex items-center space-x-6">
 
           <!-- 🔹 Search Bar (Ensured Proper Width) -->
           <div class="relative">
             <input type="text" placeholder="Search"
               class="px-4 py-2 text-sm border rounded-full w-52 md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]">
           </div>
-
-          <!-- 🔹 Profile Section (Fixed Alignment) -->
-          <div @click="goToProfile" class="flex items-center space-x-2 cursor-pointer">
-            <img class="w-10 h-10 rounded-full border border-[#5B3926]" src="https://via.placeholder.com/50" alt="Profile">
-            <span class="text-[#5B3926] font-semibold">User</span>
-          </div>
-
-        </div>
-
       </div>
     </nav>
 
