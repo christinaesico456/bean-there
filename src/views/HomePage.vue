@@ -1,5 +1,7 @@
+<!-- filepath: /c:/Bean There/bean-there/src/views/HomePage.vue -->
 <script setup>
-import { useRouter } from 'vue-router'; 
+import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 import homeCoffee from '/home-coffee.png';
 import aboutCoffee from '/about-coffee.png';
 import tinatangi from '/Tinatangi.jpg';
@@ -7,35 +9,57 @@ import somedays from '/Somedays.jpg';
 import hbsb from '/HBSB.jpg';
 import bfc from '/bfc.jpg';
 
-const router = useRouter(); 
+const router = useRouter();
+const isAuthenticated = ref(false); // Replace with actual authentication check
+
 const goToLogin = () => {
-  router.push({ name: 'login' }); 
+  router.push({ name: 'login' });
 };
 
+const goToProfile = () => {
+  if (isAuthenticated.value) {
+    router.push({ name: 'profile' });
+  } else {
+    goToLogin();
+  }
+};
 </script>
 
 <template>
   <div class="min-h-screen font-serif text-[#5B3926] bg-[#F5EDE0] text-base">
-
-    <!--Navbar -->
+    
+    <!-- ✅ Navbar -->
     <nav class="fixed top-0 z-50 w-full bg-[#F8F5F0] shadow-md py-4">
       <div class="flex items-center justify-between px-8 mx-auto max-w-7xl">
         
         <!-- Logo -->
-        <img :src="logo" alt="Logo" class="h-12">
+        <div class="text-2xl font-bold text-[#5B3926]">Bean There</div>
 
-       <!-- Navigation -->
-       <div class="hidden space-x-6 text-lg md:flex">
-          <a href="#" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Home</a>
-          <a href="#cafe-directory" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Café Directory</a>
-          <a href="#menu" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Menu</a>
-          <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">About</a>
+        <!-- Navigation Links -->
+        <div class="hidden space-x-6 text-lg md:flex">
+          <a href="#" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">Home</a>
+          <a href="#cafe-directory" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">Café Directory</a>
+          <a href="#menu" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">Menu</a>
+          <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">About</a>
+        </div>
+        
+        <!-- ✅ Search & Profile Section -->
+        <div class="flex items-center space-x-6">
+
+          <!-- 🔹 Search Bar (Ensured Proper Width) -->
+          <div class="relative">
+            <input type="text" placeholder="Search"
+              class="px-4 py-2 text-sm border rounded-full w-52 md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]">
+          </div>
+
+          <!-- 🔹 Profile Section (Fixed Alignment) -->
+          <div @click="goToProfile" class="flex items-center space-x-2 cursor-pointer">
+            <img class="w-10 h-10 rounded-full border border-[#5B3926]" src="https://via.placeholder.com/50" alt="Profile">
+            <span class="text-[#5B3926] font-semibold">User</span>
+          </div>
+
         </div>
 
-        <!-- Search Bar -->
-        <div class="relative">
-          <input type="text" placeholder="Search" class="px-4 py-2 text-sm border rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]">
-        </div>
       </div>
     </nav>
 
@@ -107,7 +131,6 @@ const goToLogin = () => {
     </section>
   </div>
 </template>
-
 
 <style scoped>
 @keyframes float {
