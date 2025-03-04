@@ -8,6 +8,8 @@ import somedays from '/Somedays.jpg';
 import hbsb from '/HBSB.jpg';
 import bfc from '/bfc.jpg';
 
+const router = useRouter();
+
 const goToLogin = () => {
   router.push({ name: 'login' });
 };
