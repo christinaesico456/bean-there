@@ -1,85 +1,106 @@
-<template>
-  <div class="min-h-screen bg-[#F5EDE0] text-[#5B3926] font-serif">
+<script setup>
+import { ref } from 'vue';
 
-    <!-- Header -->
-    <header class="relative h-[600px] bg-cover bg-center text-white flex items-center justify-center text-5xl font-bold">
-      <div class="absolute inset-0 bg-black bg-opacity-30"></div>
-      <h1 class="relative">Tinatangi Café</h1>
+const menu = ref({
+  coffee: ['Caramel', 'Dark Mocha', 'Triple Treat'],
+  riceMeals: ['Beef Tapa', 'Honey Garlic Chicken', 'Liempo Bacon'],
+  nonCoffee: ['Strawberry', 'Blueberry', 'Caramel Vanilla'],
+  pasta: ['Creamy Pesto', 'Chicken Alfredo', 'Spanish Sardines']
+});
+</script>
+
+<template>
+  <div class="min-h-screen font-serif text-white bg-[#4E2A16]">
+    <!-- Hero Section -->
+    <header class="relative flex items-center justify-center h-screen text-white bg-center bg-cover"
+      :style="`background-image: url(${cafeBg})`">
+      <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div class="relative z-10 text-center">
+        <h1 class="text-5xl font-bold">Tinatangi Café</h1>
+      </div>
     </header>
 
     <!-- Location & Hours -->
-    <section class="grid grid-cols-2 gap-4 text-center py-8 bg-[#5B3926] text-white">
+    <section class="grid grid-cols-2 text-center bg-[#603B24] py-8">
       <div>
-        <h3 class="text-lg font-semibold">Location</h3>
-        <p>1524 Abel Santos Avenue, Brgy. Sabang, Dasmariñas, Cavite</p>
+        <h2 class="text-xl font-bold">Location</h2>
+        <p>10 Juan And Santos Avenue, <br> Salitran, Dasmariñas, Cavite</p>
       </div>
       <div>
-        <h3 class="text-lg font-semibold">Opening Hours</h3>
-        <p>Monday - Sunday: 7AM - 11PM</p>
+        <h2 class="text-xl font-bold">Opening Hours</h2>
+        <p>Monday - Sunday: <br> 7 AM - 12 MN</p>
       </div>
     </section>
 
-    <!-- About -->
-    <section class="py-16 text-center bg-white">
-      <div class="max-w-4xl mx-auto">
-
-        <h2 class="text-3xl font-bold">ABOUT TINATANGI CAFÉ</h2>
-        <p class="mt-4">Rich heritage blends with a heart-warming ambiance. Tinatangi Café brings you a carefully crafted selection of coffee and meals to satisfy your cravings.</p>
-      </div>
+    <!-- About Section -->
+    <section class="py-12 px-6 bg-white text-[#4E2A16] text-center">
+      <h2 class="text-2xl font-bold">ABOUT TINATANGI CAFE</h2>
+      <p class="max-w-2xl mx-auto mt-2">Tinatangi Café is a coffee shop that provides specialty brews and a cozy ambiance. We focus on quality, craftsmanship, and local flavors. Our passion is to bring people together over a great cup of coffee.</p>
     </section>
 
     <!-- Café Offerings -->
-    <section class="py-12 bg-[#5B3926] text-white text-center">
+    <section class="py-12 bg-[#4E2A16] text-center">
       <h2 class="mb-6 text-3xl font-bold">Café Offerings</h2>
-      <div class="flex justify-center gap-8">
-  
+      <div class="flex justify-center gap-6">
+        <div class="bg-[#603B24] p-4 rounded-lg">☕ Coffee</div>
+        <div class="bg-[#603B24] p-4 rounded-lg">🍵 Tea</div>
+        <div class="bg-[#603B24] p-4 rounded-lg">🍰 Desserts</div>
+        <div class="bg-[#603B24] p-4 rounded-lg">🍽️ Meals</div>
       </div>
     </section>
 
     <!-- Gallery -->
-    <section class="py-16 text-center bg-white">
-      <h2 class="text-3xl font-bold text-[#5B3926]">Gallery</h2>
-      <div class="grid max-w-4xl grid-cols-2 gap-4 mx-auto mt-6">
-        <div class="h-40 bg-gray-300"></div>
-        <div class="h-40 bg-gray-300"></div>
-        <div class="h-20 bg-gray-300"></div>
-        <div class="h-20 bg-gray-300"></div>
+    <section class="py-12 bg-[#3B2416] text-center">
+      <h2 class="mb-6 text-3xl font-bold">Gallery</h2>
+      <div class="grid max-w-4xl grid-cols-2 gap-4 mx-auto">
+        <div class="w-full h-40 bg-gray-500"></div>
+        <div class="w-full h-40 bg-gray-500"></div>
+        <div class="w-full h-40 bg-gray-500"></div>
+        <div class="w-full h-40 bg-gray-500"></div>
       </div>
     </section>
 
-    <!-- Menu -->
-    <section class="py-16 bg-[#5B3926] text-white">
-      <h2 class="mb-6 text-3xl font-bold text-center">MENU</h2>
-      <div class="grid max-w-5xl grid-cols-2 gap-6 mx-auto">
+    <!-- Menu Section -->
+    <section class="py-12 bg-[#4E2A16] text-center">
+      <h2 class="mb-6 text-3xl font-bold">MENU</h2>
+      <div class="grid max-w-4xl grid-cols-2 gap-8 mx-auto">
         <div>
-          <h3 class="text-lg font-semibold">COFFEE BASED</h3>
-          <p>Caramel, Dark Mocha, Triple Delight</p>
+          <h3 class="text-xl font-semibold">COFFEE BASED</h3>
+          <ul class="mt-2" v-for="item in menu.coffee" :key="item">
+            <li>- {{ item }}</li>
+          </ul>
         </div>
         <div>
-          <h3 class="text-lg font-semibold">NON-COFFEE BASED</h3>
-          <p>Strawberry, Blueberry, Caramel Vanilla</p>
+          <h3 class="text-xl font-semibold">NON-COFFEE BASED</h3>
+          <ul class="mt-2" v-for="item in menu.nonCoffee" :key="item">
+            <li>- {{ item }}</li>
+          </ul>
         </div>
         <div>
-          <h3 class="text-lg font-semibold">RICE MEAL</h3>
-          <p>Beef Tapa, Honey Garlic Chicken, Liempo Tostado</p>
+          <h3 class="text-xl font-semibold">RICE MEALS</h3>
+          <ul class="mt-2" v-for="item in menu.riceMeals" :key="item">
+            <li>- {{ item }}</li>
+          </ul>
         </div>
         <div>
-          <h3 class="text-lg font-semibold">PASTA</h3>
-          <p>Creamy Pesto, Chicken Alfredo, Spanish Sardines</p>
+          <h3 class="text-xl font-semibold">PASTA</h3>
+          <ul class="mt-2" v-for="item in menu.pasta" :key="item">
+            <li>- {{ item }}</li>
+          </ul>
         </div>
       </div>
     </section>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center bg-[#3B2416]">
+      <p>Follow us on Social Media</p>
+      <div class="flex justify-center gap-6 mt-2">
+        <span>📘 Facebook</span>
+        <span>📸 Instagram</span>
+        <span>🐦 Twitter</span>
+      </div>
+    </footer>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'TinatangiCafe',
-};
-</script>
-
-<style>
-
-</style>
 
   
