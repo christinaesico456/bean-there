@@ -25,12 +25,8 @@
         <div class="my-4 text-center">Or</div>
 
         <button class="w-full py-3 border border-white rounded">
-          Sign in with Google
+          Create an account
         </button>
-
-        <p class="mt-4 text-sm text-center">
-          Don't have an account? <span class="font-bold text-white cursor-pointer">Sign up</span>
-        </p>
       </div>
     </div>
   </div>
