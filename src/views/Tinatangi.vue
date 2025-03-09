@@ -7,10 +7,10 @@ import "swiper/css/pagination";
 
 // Ensure correct image paths from public folder
 const images = [
-  "/images/img1.jpg",
-  "/images/img2.jpg",
-  "/images/img3.jpg",
-  "/images/img4.jpg",
+  "/img1.jpg",
+  "/img2.jpg",
+  "/img3.jpg",
+  "/img4.jpg",
 ];
 </script>
 
@@ -54,13 +54,13 @@ const images = [
     <!-- Text container -->
         <div class="relative z-10 text-center">
           <h1 class="mb-2 text-4lx">Tinatangi Café</h1>
-            <p class="text-xl text-gray-200 italic">"Crafted with care, poured with passion"</p>
+            <p class="text-xl italic text-gray-200">"Crafted with care, poured with passion"</p>
         </div>
 
     <!-- Location and Opening Hours -->
         </header>
           <section class="flex justify-center items-center text-center py-20 bg-[#5B3926] text-white w-full">
-        <div class="flex w-3/4 justify-between items-center gap-16"> 
+        <div class="flex items-center justify-between w-3/4 gap-16"> 
 
     <!-- Location -->
         <div class="w-1/3 px-8 text-center"> 
@@ -81,18 +81,18 @@ const images = [
 
     <!-- About -->
         <div class="flex justify-center items-center bg-[#5B3926] h-[550px] px-8">
-        <div class="flex flex-col md:flex-row items-center max-w-5xl w-full space-x-12">
+        <div class="flex flex-col items-center w-full max-w-5xl space-x-12 md:flex-row">
     
     <!-- Image -->
-        <div class="md:w-1/3 flex justify-center">
-          <img src="/logstin.png" alt="Tinatangi Café Logo" class="w-120 h-auto scale-150" />
+        <div class="flex justify-center md:w-1/3">
+          <img src="/logstin.png" alt="Tinatangi Café Logo" class="h-auto scale-150 w-120" />
         </div>
 
     <!-- Text Content -->
-        <div class="md:w-2/3 text-center">
-          <h2 class="text-5xl font-extrabold text-white mb-6">
+        <div class="text-center md:w-2/3">
+          <h2 class="mb-6 text-5xl font-extrabold text-white">
           ABOUT TINATANGI CAFE </h2>
-        <p class="mt-6 text-white text-lg leading-relaxed">
+        <p class="mt-6 text-lg leading-relaxed text-white">
         Bean Scene is a coffee shop that provides you with quality coffee that helps boost your productivity and helps build your mood.
         Having a cup of coffee is good, but having a cup of real coffee is greater. There is no doubt that you will enjoy this coffee more than others you have ever tasted.
         </p>
@@ -103,7 +103,7 @@ const images = [
     <!-- Café Offerings -->
       <section class="py-12 bg-[#5B3926] text-[#ffffff] text-center">
         <h2 class="mb-6 text-4xl font-bold">Café Offerings</h2>
-      <div class="flex justify-center gap-3 flex-wrap">
+      <div class="flex flex-wrap justify-center gap-3">
       <div class="bg-[#F8E4BE] text-[#411D0F] p-3 rounded-lg shadow-lg w-40 font-semibold flex items-center justify-center h-16 text-sm">
         ☕ Dine-in
       </div>
@@ -124,6 +124,8 @@ const images = [
 
 
     <!-- Gallery -->
+    <section class="py-12 bg-[#5B3926] text-[#ffffff] text-center">
+      <h2 class="mb-6 text-4xl font-bold">Gallery</h2>
     <div class="flex justify-center items-center h-screen bg-[#5B3926]-900">
     <Swiper
       :modules="[EffectCoverflow, Pagination]"
@@ -146,6 +148,7 @@ const images = [
       </SwiperSlide>
     </Swiper>
   </div>
+</section>
 
 
     <!--MENU-->
@@ -172,7 +175,7 @@ const images = [
         <p class="text-lg font-semibold">150</p>
       </div>
       <!--Americano-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">AMERICANO</p>
           <p>Expresso Shot, Water</p>
@@ -180,7 +183,7 @@ const images = [
         <p class="text-lg font-semibold">99</p>
       </div>
       <!--Cappuccino-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">CAPPUCCINO</p>
           <p>Expresso, steamed milk, milk form</p>
@@ -214,7 +217,7 @@ const images = [
         <p class="text-lg font-semibold">199</p>
       </div>
       <!--Blueberry-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">BLUEBERRY</p>
           <p>Blueberry, milk</p>
@@ -222,7 +225,7 @@ const images = [
         <p class="text-lg font-semibold">199</p>
       </div>
       <!--Caramel Vanilla-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">CARAMEL VANILLA</p>
           <p>Caramel Vanilla, Milk</p>
@@ -255,7 +258,7 @@ const images = [
         <p class="text-lg font-semibold">160</p>
       </div>
       <!--Puhon Loaf-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">PUHON LOAF</p>
           <p>Cheese Loaf</p>
@@ -263,7 +266,7 @@ const images = [
         <p class="text-lg font-semibold">175</p>
       </div>
       <!--Matahom Loaf-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">MATAHOM LOAF</p>
           <p>Ube Loaf</p>
@@ -295,28 +298,28 @@ const images = [
         <p class="text-lg font-semibold">165</p>
       </div>
       <!--Blueberry Cheesecake-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">BLUEBERRY CHEESECAKE</p>
         </div>
         <p class="text-lg font-semibold">165</p>
       </div>
       <!--Matcha Cheesecake-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">MATCHA CHEESECAKE</p>
         </div>
         <p class="text-lg font-semibold">170</p>
       </div>
       <!--Oreo Cheesecake-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">OREO CHEESECAKE</p>
         </div>
         <p class="text-lg font-semibold">170</p>
       </div>
       <!--Triple Chocolate Cake-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">TRIPLE CHOCOLATE CAKE</p>
         </div>
@@ -348,7 +351,7 @@ const images = [
           <p class="text-lg font-semibold">205</p>
         </div>
       <!-- Sisig-->
-        <div class="flex justify-between border-t pt-4">
+        <div class="flex justify-between pt-4 border-t">
           <div>
             <p class="text-lg font-bold">SIZZLING PORK SISIG</p>
             <p class="text-sm text-white-600">Pork, red and white onion, green chill, egg, mixed with our homemade mayo mix served in a sizzing plate with rice.</p>
@@ -356,7 +359,7 @@ const images = [
           <p class="text-lg font-semibold">199</p>
         </div>
       <!-- Beef Tapa-->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">BEEF TAPA</p>
           <p class="text-sm text-white-600">Special Beef Tapa with sinangag rice and egg.</p>
@@ -389,7 +392,7 @@ const images = [
         <p class="text-lg font-semibold">250</p>
       </div>
       <!-- Spanish Sardines -->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">SPANISH SARDINES</p>
           <p class="text-sm text-white-600">Spaghetti pasta tossed with seasoned olive oil, Spanish sardines, and fresh basil with toasted bread</p>
@@ -397,7 +400,7 @@ const images = [
         <p class="text-lg font-semibold">235</p>
       </div>
       <!-- Creamy Pesto -->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">CREAMY PESTO</p>
           <p class="text-sm text-white-600">Linguini pasta tossed with our homemade pesto sauce and grilled chicken topped with crushed cashew, parmesan along with toasted bread</p>
@@ -405,7 +408,7 @@ const images = [
         <p class="text-lg font-semibold">265</p>
       </div>
       <!-- Chicken Alfredo -->
-      <div class="flex justify-between border-t pt-4">
+      <div class="flex justify-between pt-4 border-t">
         <div>
           <p class="text-lg font-bold">CHICKEN ALFREDO</p>
           <p class="text-sm text-white-600">Linguini pasta tossed with our homemade alfredo sauce and grilled chicken topped with grated parmesan along with toasted bread</p>
@@ -418,7 +421,7 @@ const images = [
 
       <!-- Footer -->
         <footer class="text-sm text-[#5B3926] py-6 border-t-8 border-[#5B3926]">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-6">
+        <div class="flex flex-col items-center justify-between px-6 mx-auto max-w-7xl md:flex-row">
         <!-- Left Side: Logo and Socials -->
         <div class="flex flex-col md:items-start">
           <div class="flex space-x-4">
@@ -435,9 +438,9 @@ const images = [
         </div>
 
       <!-- Right Side: Links & Contact Info -->
-        <div class="text-center md:text-right mt-6 md:mt-0">
+        <div class="mt-6 text-center md:text-right md:mt-0">
           <nav class="mb-4">
-            <ul class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6 text-lg">
+            <ul class="flex flex-col space-y-2 text-lg md:flex-row md:space-y-0 md:space-x-6">
               <li><a href="#" class="hover:text-[#5B3926]">Home</a></li>
               <li><a href="#" class="hover:text-[#5B3926]">Menu</a></li>
             </ul>
