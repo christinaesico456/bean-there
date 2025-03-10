@@ -115,6 +115,7 @@ defineExpose({
       <div class="max-w-6xl mx-auto">
         <h2 class="mb-10 text-4xl font-bold text-center text-[#5B3926]">Feedbacks</h2>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
+
           <div class="bg-white text-[#5B3926] p-6 rounded-lg shadow">
             <div class="flex items-center mb-2">
               <span class="mr-2 text-2xl">☕</span>
@@ -122,6 +123,7 @@ defineExpose({
             </div>
             <p>Best coffee shop in town!</p>
           </div>
+
           <div class="bg-white text-[#5B3926] p-10 rounded-xl shadow">
             <div class="flex items-center mb-2">
               <span class="mr-2 text-2xl">☕</span>
@@ -129,6 +131,7 @@ defineExpose({
             </div>
             <p>Exceptional taste and texture.</p>
           </div>
+
           <div class="bg-white text-[#5B3926] p-6 rounded-lg shadow">
             <div class="flex items-center mb-2">
               <span class="mr-2 text-2xl">☕</span>
@@ -136,6 +139,7 @@ defineExpose({
             </div>
             <p>Nothing compares to this coffee.</p>
           </div>
+
           <div class="bg-white text-[#5B3926] p-6 rounded-lg shadow">
             <div class="flex items-center mb-2">
               <span class="mr-2 text-2xl">☕</span>
@@ -143,6 +147,7 @@ defineExpose({
             </div>
             <p>Worth every penny.</p>
           </div>
+          
         </div>
         <div class="flex justify-center mt-10">
           <button
