@@ -23,7 +23,8 @@ const images = [
         <div class="flex items-center justify-between px-8 mx-auto max-w-7xl">
     
     <!-- Logo -->
-        <img :src="logo" alt="Logo" class="h-12">
+        <div><img src="/beanthere-logo.png" alt="Bean There Logo" class="w-12 h-auto"></div>
+
 
     <!-- Navigation -->
         <div class="hidden space-x-6 text-lg md:flex">
