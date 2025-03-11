@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+
 import homeCoffee from '/home-coffee.png';
 import aboutCoffee from '/about-coffee.png';
 import tinatangi from '/Tinatangi.jpg';
@@ -9,6 +10,21 @@ import hbsb from '/HBSB.jpg';
 import bfc from '/bfc.jpg';
 
 const router = useRouter();
+const searchQuery = ref("");
+
+const cafes = ref([
+  { name: "Tinatangi Café", img: tinatangi, route: "/tinatangi" },
+  { name: "Someday Brews", img: somedays, route: "/someday-brews" },
+  { name: "He Brews She Bakes", img: hbsb, route: "/he-brews-she-bakes" },
+  { name: "But First Coffee", img: bfc, route: "/but-first-coffee" }
+]);
+
+// Computed property to filter cafes based on search input
+const filteredCafes = computed(() => {
+  return cafes.value.filter(cafe =>
+    cafe.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
 
 const goToLogin = () => {
   router.push({ name: 'login' });
@@ -23,6 +39,7 @@ defineExpose({
   goToLogin
 });
 </script>
+
 
 <template>
   <div class="min-h-screen font-serif text-[#5B3926] bg-[#F5EDE0] text-base">
@@ -42,12 +59,13 @@ defineExpose({
           <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold">About</a>
         </div>
 
-        <!-- User Profile and Search Bar -->
+        <!-- Search Bar & Profile Button -->
         <div class="flex items-center space-x-4">
           <div class="relative">
             <input
+              v-model="searchQuery"
               type="text"
-              placeholder="Search"
+              placeholder="Search cafés..."
               class="px-4 py-2 text-sm border rounded-full w-36 md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]"
             />
           </div>
