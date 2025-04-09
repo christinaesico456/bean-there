@@ -1,4 +1,5 @@
 <script setup>
+import { useRouter } from 'vue-router';
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCoverflow, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -12,7 +13,9 @@ const images = [
   "/img3.jpg",
   "/img4.jpg",
 ];
+const router = useRouter();
 </script>
+
 
 
 <template>
@@ -28,7 +31,7 @@ const images = [
 
     <!-- Navigation -->
         <div class="hidden space-x-6 text-lg md:flex">
-          <a href="#" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Home</a>
+          <a href="#" @click="router.push('/home')" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Home</a>
           <a href="#cafe-directory" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Café Directory</a>
           <a href="#menu" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Menu</a>
           <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">About</a>

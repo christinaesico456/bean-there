@@ -4,14 +4,6 @@ import UserProfile from "../views/UserProfile.vue";
 import SearchResults from "../views/SearchResults.vue";
 import { ref } from 'vue';
 
-const cafes = ref([]);
-
-fetch('http://localhost:8000/api/cafes/')
-  .then(response => response.json())
-  .then(data => {
-    cafes.value = data;
-  })
-  .catch(error => console.error('Error:', error));
 
 const routes = [
   {

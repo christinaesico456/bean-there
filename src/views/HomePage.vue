@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 
 import homeCoffee from '/home-coffee.png';
 import aboutCoffee from '/about-coffee.png';
@@ -18,13 +18,35 @@ const cafes = ref([
   { name: "He Brews She Bakes", img: hbsb, route: "/he-brews-she-bakes" },
   { name: "But First Coffee", img: bfc, route: "/but-first-coffee" }
 ]);
+const filteredCafes = ref([]);  // Make filteredCafes reactive
 
-// Computed property to filter cafes based on search input
-const filteredCafes = computed(() => {
-  return cafes.value.filter(cafe =>
-    cafe.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+async function fetchCafes() {
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/cafes/?search=${searchQuery.value}`);
+    const data = await response.json();
+    cafes.value = data.results || [];  // Assign cafes from response
+    console.log(cafes.value);  // Log the cafes to check the data
+    filterCafe();  // Immediately filter cafes after fetching them
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+function filterCafe() {
+  filteredCafes.value = cafes.value.filter(cafe =>
+    JSON.stringify(cafe).toLowerCase().includes(searchQuery.value.toLowerCase())
   );
+}
+
+// Watch for changes in searchQuery and update filteredCafes
+watch(searchQuery, (newQuery) => {
+  filterCafe();      // Update filtered cafes
+  fetchCafes();      // Fetch cafes again based on the new query
+  scrollToDirectory(); // Scroll to Café Directory
 });
+
+
+fetchCafes();  // Initial fetch
 
 const goToLogin = () => {
   router.push({ name: 'login' });
@@ -38,16 +60,23 @@ defineExpose({
   goToProfile,
   goToLogin
 });
+
+
+function scrollToDirectory() {
+  const section = document.getElementById("cafe-directory");
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
 </script>
 
 
 <template>
   <div class="min-h-screen font-serif text-[#5B3926] bg-[#F5EDE0] text-base">
-
     <!-- Navbar -->
     <nav class="fixed top-0 z-50 w-full bg-[#F8F5F0] shadow-md py-4">
       <div class="flex items-center justify-between px-8 mx-auto max-w-7xl">
-
         <!-- Logo -->
         <div><img src="/beanthere-logo.png" alt="Bean There Logo" class="w-12 h-auto"></div>
 
@@ -62,18 +91,12 @@ defineExpose({
         <!-- Search Bar & Profile Button -->
         <div class="flex items-center space-x-4">
           <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search cafés..."
-              class="px-4 py-2 text-sm border rounded-full w-36 md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]"
-            />
+            <input v-model="searchQuery" type="text" placeholder="Search cafés..."
+              class="px-4 py-2 text-sm border rounded-full w-36 md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]" />
           </div>
 
-          <button
-          @click="$router.push('/profile')"
-          class="px-4 py-1 bg-[#5B3926] text-white rounded-full hover:bg-[#A67C52] transition duration-300"
-          >
+          <button @click="$router.push('/profile')"
+            class="px-4 py-1 bg-[#5B3926] text-white rounded-full hover:bg-[#A67C52] transition duration-300">
             Profile
           </button>
         </div>
@@ -94,22 +117,49 @@ defineExpose({
     <section id="cafe-directory" class="py-32 bg-[#f8f5f0]">
       <div class="max-w-6xl mx-auto text-center">
         <h2 class="mb-20 text-4xl font-bold text-[#5B3926]">Café Directory</h2>
-        <div class="grid items-center grid-cols-1 gap-6 md:grid-cols-4">
+
+        <!-- Display filtered cafes -->
+        <div v-if="filteredCafes.length > 0 && searchQuery !== ''"
+          class="grid items-center grid-cols-1 gap-6 md:grid-cols-4">
+          <div v-for="cafe in filteredCafes" :key="cafe.name"
+            class="flex flex-col items-center transition duration-300 transform hover:scale-105">
+            <img :src="cafe.image" :alt="cafe.name" class="object-cover rounded-lg shadow-lg w-60 h-60">
+            <button @click="router.push(cafe.route)"
+              class="mt-4 px-6 py-2 text-white bg-[#5B3926] rounded-full hover:bg-[#A67C52] text-lg shadow-md transition duration-300">Visit
+              Now</button>
+          </div>
+        </div>
+
+        <!-- Display 'No cafes found' message when no cafes match the search query -->
+        <div v-else-if="searchQuery !== '' && filteredCafes.length === 0">
+          <p class="text-lg font-semibold text-[#5B3926]">No cafes found for "{{ searchQuery }}".</p>
+        </div>
+
+        <!-- Default list of cafes when no search query is entered or no results -->
+        <div v-else class="grid items-center grid-cols-1 gap-6 md:grid-cols-4">
           <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
             <img :src="tinatangi" alt="Tinatangi Cafe" class="object-cover rounded-lg shadow-lg w-60 h-60">
-            <button @click="router.push('/tinatangi')" class="mt-4 px-6 py-2 text-white bg-[#5B3926] rounded-full hover:bg-[#A67C52] text-lg shadow-md transition duration-300">Visit Now</button>
+            <button @click="router.push('/tinatangi')"
+              class="mt-4 px-6 py-2 text-white bg-[#5B3926] rounded-full hover:bg-[#A67C52] text-lg shadow-md transition duration-300">Visit
+              Now</button>
           </div>
           <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
             <img :src="somedays" alt="Someday Brews" class="object-cover rounded-lg shadow-lg w-60 h-60">
-            <button @click="router.push('/someday-brews')" class="mt-4 px-6 py-2 text-white bg-[#003366] rounded-full hover:bg-[#002244] text-lg shadow-md transition duration-300">Visit Now</button>
+            <button @click="router.push('/someday-brews')"
+              class="mt-4 px-6 py-2 text-white bg-[#003366] rounded-full hover:bg-[#002244] text-lg shadow-md transition duration-300">Visit
+              Now</button>
           </div>
           <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
             <img :src="hbsb" alt="He Brews She Bakes" class="object-cover rounded-lg shadow-xl w-60 h-60">
-            <button @click="router.push('/he-brews-she-bakes')" class="mt-4 px-6 py-2 text-[#5B3926] bg-[#F8F5F0] border border-[#5B3926] rounded-full hover:bg-[#E3D5C5] text-lg shadow-md transition duration-300">Visit Now</button>
+            <button @click="router.push('/he-brews-she-bakes')"
+              class="mt-4 px-6 py-2 text-[#5B3926] bg-[#F8F5F0] border border-[#5B3926] rounded-full hover:bg-[#E3D5C5] text-lg shadow-md transition duration-300">Visit
+              Now</button>
           </div>
           <div class="flex flex-col items-center transition duration-300 transform hover:scale-105">
             <img :src="bfc" alt="But First Coffee" class="object-cover rounded-lg shadow-lg w-60 h-60">
-            <button @click="router.push('/but-first-coffee')" class="px-6 py-2 mt-4 text-lg text-white transition duration-300 bg-black rounded-full shadow-md hover:bg-gray-800">Visit Now</button>
+            <button @click="router.push('/but-first-coffee')"
+              class="px-6 py-2 mt-4 text-lg text-white transition duration-300 bg-black rounded-full shadow-md hover:bg-gray-800">Visit
+              Now</button>
           </div>
         </div>
       </div>
@@ -120,7 +170,12 @@ defineExpose({
       <div class="flex flex-col items-center max-w-6xl mx-auto md:flex-row">
         <div class="md:w-1/2">
           <h2 class="mb-12 text-4xl font-bold">About Us</h2>
-          <p class="text-lg font-medium">Bean There is all about celebrating the vibrant café culture in Dasmariñas, Cavite, making it easier for people to discover and support local coffee spots. We believe every café has a story to tell, from the cozy corners perfect for deep conversations to the carefully crafted brews that keep us coming back. By shining a light on these hidden gems, we’re not just promoting great coffee—we’re building connections, supporting small businesses, and creating a space where everyone can experience the magic of a good café.</p>
+          <p class="text-lg font-medium">Bean There is all about celebrating the vibrant café culture in Dasmariñas,
+            Cavite, making it easier for people to discover and support local coffee spots. We believe every café has a
+            story to tell, from the cozy corners perfect for deep conversations to the carefully crafted brews that keep
+            us coming back. By shining a light on these hidden gems, we’re not just promoting great coffee—we’re
+            building connections, supporting small businesses, and creating a space where everyone can experience the
+            magic of a good café.</p>
         </div>
         <div class="mt-6 md-6 md:mt-0 animate-float">
           <img :src="aboutCoffee" alt="About Coffee">
@@ -165,19 +220,17 @@ defineExpose({
             </div>
             <p>Worth every penny.</p>
           </div>
-          
+
         </div>
         <div class="flex justify-center mt-10">
-          <button
-            @click="goToLogin"
-            class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300"
-          >
+          <button @click="goToLogin"
+            class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300">
             Get Started
           </button>
         </div>
       </div>
     </section>
-    
+
     <!-- Footer -->
     <footer class="bg-[#5B3926] text-white py-10 mt-0 text-center">
       <p>© 2025 Bean There. All rights reserved.</p>
@@ -187,9 +240,17 @@ defineExpose({
 
 <style scoped>
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-30px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-30px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {
