@@ -14,8 +14,8 @@
 
       <!-- Login Form -->
       <div class="w-full max-w-md">
-        <input type="email" placeholder="email" class="w-full p-3 mb-4 text-black bg-white rounded" />
-        <input type="password" placeholder="password" class="w-full p-3 mb-2 text-black bg-white rounded" />
+        <input v-model="usernameOrEmail" type="email" placeholder="email" class="w-full p-3 mb-4 text-black bg-white rounded" />
+        <input v-model="password" type="password" placeholder="password" class="w-full p-3 mb-2 text-black bg-white rounded" />
         <div class="mb-4 text-xs text-right text-gray-400 cursor-pointer">Forgot password?</div>
 
         <button @click="login" class="w-full bg-[#A37550] text-white py-3 rounded hover:bg-[#8B5E3B]">
@@ -24,21 +24,44 @@
 
         <div class="my-4 text-center">Or</div>
 
-        <button class="w-full py-3 border border-white rounded">
-          Create an account
-        </button>
+        <router-link to="/signup" class="w-full">
+          <button class="w-full py-3 border border-white rounded">
+            Create an account
+          </button>
+        </router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
-const router = useRouter();
+const router = useRouter()
+const userStore = useUserStore()
 
-const login = () => {
-  // Navigate to home page after successful login
-  router.push('/home');
-};
+const usernameOrEmail = ref('')
+const password = ref('')
+const errorMessage = ref('')
+
+const login = async () => {
+  try {
+    const response = await axios.post('http://localhost:8000/api/login/', {
+      username: usernameOrEmail.value,
+      password: password.value,
+    })
+
+    const token = response.data.token
+    localStorage.setItem('token', token)
+    userStore.setToken(token)
+
+    router.push('/profile')
+  } catch (error) {
+    errorMessage.value =
+      error.response?.data?.detail || 'Login failed. Please try again.'
+  }
+}
 </script>

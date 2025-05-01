@@ -1,6 +1,143 @@
+<script setup>
+import { ref } from 'vue'
+import axios from 'axios'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+// Initialize fields with current data from store
+const firstName = ref(userStore.user.firstName)
+const lastName = ref(userStore.user.lastName)
+const email = ref(userStore.user.email)
+const phone = ref(userStore.user.phone)
+const bio = ref(userStore.user.bio)
+const profilePicture = ref(userStore.user.profilePicture)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+// Handle Profile Picture Upload
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      profilePicture.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+// Save the changes to profile picture and bio
+const saveChanges = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    const response = await axios.put('http://localhost:8000/api/user/update-profile', {
+      bio: bio.value,
+      profile_picture: profilePicture.value,  // Assuming base64 string for profile picture
+    })
+
+    // Update the user data in the store
+    userStore.setUser(response.data)
+    successMessage.value = 'Profile updated successfully!'
+  } catch (error) {
+    errorMessage.value = error.response?.data?.error || 'Failed to update profile.'
+  }
+}
+</script>
+
 <template>
-    <div class="p-6">
-      <h2 class="mb-4 text-xl font-semibold">Settings</h2>
+  <div class="flex flex-col items-center justify-center min-h-screen">
+    <div class="flex flex-col items-center w-full max-w-3xl mx-auto mb-10">
+      <div class="w-32 h-32 mb-4 overflow-hidden bg-gray-300 rounded-full">
+        <img
+          v-if="profilePicture"
+          :src="profilePicture"
+          alt="Profile Picture"
+          class="object-cover w-full h-full"
+        />
       </div>
-  </template>
-  
+
+      <input
+        type="file"
+        @change="handleImageUpload"
+        accept="image/*"
+        class="hidden"
+        ref="fileInput"
+      />
+      <button
+        @click="$refs.fileInput.click()"
+        class="bg-[#4A2C2A] hover:bg-[#603A36] text-white font-semibold px-6 py-2 rounded-full shadow-md mb-4"
+      >
+        Change Profile Picture
+      </button>
+      <p class="text-center">{{ firstName }} {{ lastName }}</p>
+    </div>
+
+    <!-- Settings Form -->
+    <form @submit.prevent="saveChanges" class="w-full max-w-4xl p-8 bg-white rounded shadow-md">
+      <!-- Display-only fields -->
+      <div class="grid grid-cols-2 gap-8">
+        <div>
+          <label class="block mb-2 font-semibold text-gray-700">First Name</label>
+          <input
+            v-model="firstName"
+            type="text"
+            class="block w-full p-2 bg-gray-100 border rounded-md"
+            readonly
+          />
+        </div>
+        <div>
+          <label class="block mb-2 font-semibold text-gray-700">Last Name</label>
+          <input
+            v-model="lastName"
+            type="text"
+            class="block w-full p-2 bg-gray-100 border rounded-md"
+            readonly
+          />
+        </div>
+        <div>
+          <label class="block mb-2 font-semibold text-gray-700">Email</label>
+          <input
+            v-model="email"
+            type="email"
+            class="block w-full p-2 bg-gray-100 border rounded-md"
+            readonly
+          />
+        </div>
+        <div>
+          <label class="block mb-2 font-semibold text-gray-700">Phone Number</label>
+          <input
+            v-model="phone"
+            type="text"
+            class="block w-full p-2 bg-gray-100 border rounded-md"
+            readonly
+          />
+        </div>
+      </div>
+
+      <!-- Editable Bio -->
+      <div class="mt-6">
+        <label class="block mb-2 font-semibold text-gray-700">Bio</label>
+        <textarea
+          v-model="bio"
+          class="block w-full p-2 bg-gray-100 border rounded-md"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="mt-10 text-center">
+        <button
+          type="submit"
+          class="bg-[#4A2C2A] hover:bg-[#603A36] text-white font-semibold px-10 py-3 rounded-full shadow-md"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+
+    <p v-if="errorMessage" class="text-center text-red-500 error">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="text-center text-green-500 success">{{ successMessage }}</p>
+  </div>
+</template>
