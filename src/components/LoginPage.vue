@@ -8,7 +8,7 @@
       <!-- Logo -->
       <div class="mb-8">
         <div class="flex items-center justify-center w-20 h-20 bg-gray-300 rounded-full">
-          <span class="text-black">LOGO</span>
+          <div><img src="/beanthere-logo.png" alt="Bean There Logo" class="h-auto w-13"></div>
         </div>
       </div>
 
@@ -16,7 +16,8 @@
       <div class="w-full max-w-md">
         <input v-model="usernameOrEmail" type="email" placeholder="email" class="w-full p-3 mb-4 text-black bg-white rounded" />
         <input v-model="password" type="password" placeholder="password" class="w-full p-3 mb-2 text-black bg-white rounded" />
-        <div class="mb-4 text-xs text-right text-gray-400 cursor-pointer">Forgot password?</div>
+        <div v-if="errorMessage" class="mb-4 text-sm text-red-400">{{ errorMessage }}</div>
+        <div v-if="successMessage" class="mb-4 text-sm text-green-400">{{ successMessage }}</div>
 
         <button @click="login" class="w-full bg-[#A37550] text-white py-3 rounded hover:bg-[#8B5E3B]">
           Sign in
