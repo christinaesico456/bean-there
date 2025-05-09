@@ -60,6 +60,13 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const isLoading = ref(false)
 
+// Check if user is already logged in
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    router.push('/home')
+  }
+})
+
 const login = async () => {
   errorMessage.value = ''
   successMessage.value = ''
@@ -80,25 +87,47 @@ const login = async () => {
     })
     
     console.log('Login successful:', response.data)
-    successMessage.value = 'Login successful!'
+    successMessage.value = 'Login successful! Redirecting...'
     
     // Extract token from response
-    const token = response.data.token || response.data.access || response.data.key
+    let token = null
+    if (response.data.token) {
+      token = response.data.token
+    } else if (response.data.access) {
+      token = response.data.access
+    } else if (response.data.key) {
+      token = response.data.key
+    }
     
-    // Store token
-    if (token) {
-      // Store token in user store
-      userStore.setToken(token)
-      
+    if (!token) {
+      console.error('No token found in response:', response.data)
+      errorMessage.value = 'Login successful but no authentication token received.'
+      isLoading.value = false
+      return
+    }
+    
+    // Store token in user store
+    userStore.setToken(token)
+    successMessage.value = 'Login successful!'
+    
+    try {
       // Fetch user profile data
       await userStore.fetchUserProfile()
+      console.log('User profile fetched successfully')
       
-      // Redirect after successful login
-      router.push('/profile')
-    } else {
-      console.warn('No token found in response:', response.data)
-      errorMessage.value = 'Login successful but no authentication token received.'
+      setTimeout(() => {
+        // Redirect to homepage first
+        router.push('/home')
+      }, 300)
+      
+    } catch (profileError) {
+      console.error('Error fetching user profile:', profileError)
+      // If profile fetch fails, show error but don't redirect
+      errorMessage.value = 'Error loading user profile. Please try again.'
+      // Clear the token since we couldn't complete the login process
+      userStore.setToken(null)
     }
+    
   } catch (error) {
     console.error('Login error:', error)
     
