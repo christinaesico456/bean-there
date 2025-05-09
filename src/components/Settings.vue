@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 
@@ -14,6 +14,17 @@ const bio = ref(userStore.user.bio)
 const profilePicture = ref(userStore.user.profilePicture)
 const errorMessage = ref('')
 const successMessage = ref('')
+
+onMounted(() => {
+  if (userStore.user) {
+    firstName.value = userStore.user.firstName
+    lastName.value = userStore.user.lastName
+    email.value = userStore.user.email
+    phone.value = userStore.user.phone
+    bio.value = userStore.user.bio
+    profilePicture.value = userStore.user.profilePicture
+  }
+})
 
 // Handle Profile Picture Upload
 const handleImageUpload = (event) => {
@@ -33,15 +44,21 @@ const saveChanges = async () => {
   successMessage.value = ''
 
   try {
-    const response = await axios.put('http://localhost:8000/api/user/update-profile', {
+    const response = await axios.put('http://127.0.0.1:8000/accounts/profile/', {
       bio: bio.value,
-      profile_picture: profilePicture.value,  // Assuming base64 string for profile picture
+      profile_picture: profilePicture.value,  
     })
 
     // Update the user data in the store
-    userStore.setUser(response.data)
+    userStore.setUser({
+      ...userStore.user,
+      bio: bio.value,
+      profilePicture: profilePicture.value
+    })
+    
     successMessage.value = 'Profile updated successfully!'
   } catch (error) {
+    console.error('Error updating profile:', error)
     errorMessage.value = error.response?.data?.error || 'Failed to update profile.'
   }
 }

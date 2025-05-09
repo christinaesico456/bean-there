@@ -81,7 +81,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost:8000/accounts/register/', {
+    const response = await axios.post('http://127.0.0.1:8000/accounts/register/', {
       first_name: firstName.value,
       last_name: lastName.value,
       email: email.value,
@@ -90,10 +90,29 @@ const handleSubmit = async () => {
       password: password.value,
     })
 
+    console.log('Registration response:', response.data)
     successMessage.value = 'Account created successfully! Redirecting to login...'
     setTimeout(() => router.push('/login'), 2000)
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Registration failed.'
+    console.error('Registration error:', error)
+
+    if (error.response && error.response.data) {
+      if (typeof error.response.data === 'object') {
+        if (error.response.data.email) {
+          errorMessage.value = 'Email error: ${error.response.data.email[0]}'
+        } else if (error.response.data.username) {
+          errorMessage.value = 'Username error: ${error.response.data.username[0]}'
+        } else if (error.response.data.error) {
+          errorMessage.value = error.response.data.error
+        } else if (error.response.data.detail) {
+          errorMessage.value = error.response.data.detail
+        } else {
+          errorMessage.value = 'Registration failed. Please check your information.'
+        }
+      } else {
+        errorMessage.value = 'Network error. Please try again later.'
+      }
+    }
   }
 }
 </script> 

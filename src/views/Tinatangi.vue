@@ -5,7 +5,9 @@ import { EffectCoverflow, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useUserStore } from '@/stores/user';
+import axios from 'axios';
 
 // Gallery images
 const images = [
@@ -16,21 +18,117 @@ const images = [
   "/store.jpg",
 ];
 const router = useRouter();
-
-const handleHeartClick = () => {
-  alert('Heart button clicked!');
-};
+const userStore = useUserStore();
 
 const isHeartClicked = ref(false);
+const CAFE_ID = 1; 
 
-const toggleHeart = () => {
-  isHeartClicked.value = !isHeartClicked.value;
+const checkFavoriteStatus = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/favorite/user/', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    // Check if this cafe is in the user's favorites
+    const favorites = response.data;
+    isHeartClicked.value = favorites.some(favorite => favorite.cafe.id === CAFE_ID);
+  } catch (error) {
+    console.error('Error checking favorite status:', error);
+  }
+};
+
+// Toggle favorite status
+const toggleHeart = async () => {
+  try {
+    // Call the toggle endpoint
+    await axios.post(`http://127.0.0.1:8000/favorite/toggle/${CAFE_ID}/`, {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    // Toggle the heart state locally
+    isHeartClicked.value = !isHeartClicked.value;
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    // Show error message to user
+    alert('Please log in to add this cafe to your favorites');
+  }
 };
 
 const rating = ref(0);
+const feedbackText = ref('');
+const isSubmitting = ref(false);
+const feedbackError = ref('');
+const feedbackSuccess = ref('');
 
 const setRating = (star) => {
   rating.value = star;
+};
+
+// Function to submit feedback
+const submitFeedback = async () => {
+  // Validate form
+  if (rating.value === 0) {
+    feedbackError.value = 'Please select a rating';
+    return;
+  }
+  
+  if (!feedbackText.value.trim()) {
+    feedbackError.value = 'Please enter your feedback';
+    return;
+  }
+  
+  // Reset error message
+  feedbackError.value = '';
+  isSubmitting.value = true;
+  
+  try {
+    // Create the feedback object
+    const feedbackData = {
+      cafe: "Tinatangi Café", // Hardcoded for this specific café
+      rating: rating.value,
+      comment: feedbackText.value,
+      // Include user info if available from userStore
+      user_id: userStore.userId || null,
+      user_name: userStore.username || null
+    };
+    
+    // Make API call to save the feedback
+    const response = await fetch('http://127.0.0.1:8000/reviews/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Include authorization token if user is logged in
+        ...(userStore.token && { 'Authorization': `Bearer ${userStore.token}` })
+      },
+      body: JSON.stringify(feedbackData)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to submit feedback');
+    }
+    
+    // Success message
+    feedbackSuccess.value = 'Thank you for your feedback!';
+    
+    // Reset form
+    rating.value = 0;
+    feedbackText.value = '';
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      feedbackSuccess.value = '';
+    }, 3000);
+    
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    feedbackError.value = 'Failed to submit feedback. Please try again later.';
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const offerings = [
@@ -43,6 +141,11 @@ const offerings = [
   '🛵 Delivery (Food Panda)',
   '🚗 Parking'
 ];
+
+onMounted(() => {
+  checkFavoriteStatus();
+})
+
 </script>
 
 
@@ -52,7 +155,7 @@ const offerings = [
   <!-- Heart Button - Bottom Left -->
 
   <button 
-    class="fixed bottom-8 left-8 z-20 w-20 h-20 border-2 border-white text-black rounded-full shadow-lg flex items-center justify-center text-2xl transition duration-300 ease-in-out"
+    class="fixed z-20 flex items-center justify-center w-20 h-20 text-2xl text-black transition duration-300 ease-in-out border-2 border-white rounded-full shadow-lg bottom-8 left-8"
     :class="{ 'bg-red-500 text-white': isHeartClicked, 'bg-white text-black': !isHeartClicked }"
     @click="toggleHeart"> 
     ❤︎
@@ -129,7 +232,7 @@ const offerings = [
         </div>
 
     <!-- Text Content -->
-        <div class="flex justify-end items-center md:w-2/3 md:ml-16">
+        <div class="flex items-center justify-end md:w-2/3 md:ml-16">
           <div class="text-center md:text-left">
             <h2 class="mb-8 text-5xl font-extrabold text-white">
             ABOUT TINATANGI CAFE </h2>
@@ -145,12 +248,12 @@ const offerings = [
     <!-- Café Offerings -->
       <section class="py-12 bg-[#5B3926] text-[#ffffff] text-center">
         <h2 class="mb-6 text-4xl font-bold">Café Offerings</h2>
-      <div class="relative overflow-hidden max-w-5xl mx-auto">
+      <div class="relative max-w-5xl mx-auto overflow-hidden">
         <div class="flex animate-scroll-right">
           <div
             v-for="(offering, index) in [...offerings, ...offerings]"
             :key="index"
-            class="w-64 flex-shrink-0 mx-4"
+            class="flex-shrink-0 w-64 mx-4"
           >
             <div class="bg-[#ffffff] text-[#5B3926] p-3 rounded-lg shadow-lg font-semibold flex items-center justify-center h-20 text-sm">
               {{ offering }}
@@ -194,7 +297,7 @@ const offerings = [
       <!--Coffee Based-->
         <section class="py-2 bg-[#5B3926] text-white">
           <h1 class="mb-10 text-5xl font-bold text-center">OUR MENU</h1>
-          <hr class="border-t-4 border-white w-20 mx-auto mb-8">
+          <hr class="w-20 mx-auto mb-8 border-t-4 border-white">
                 <h2 class="mb-10 text-4xl font-bold text-center">Coffee Based</h2>
                 <div class="max-w-6xl mx-auto">
             <div class="grid grid-cols-2 gap-x-16 gap-y-8">
@@ -459,35 +562,50 @@ const offerings = [
           </div>
       </section>
 
-      <!-- Feedback Section -->
-        <section class="py-12 bg-[#5B3926] text-[#fff] text-center">
-          <h2 class="mb-6 text-4xl font-bold">We Value Your Feedback</h2>
-          <p class="mb-4 text-lg">How was your experience with us?</p>
-          <div class="flex justify-center mb-6">
-          <button 
-            v-for="star in 5" 
-            :key="star" 
-            @click="setRating(star)" 
-            class="text-3xl text-white hover:text-yellow-500 transition duration-300"
-            :class="{ 'text-yellow-500': rating >= star }">
-            ★
-          </button>
+       <!-- Feedback Section -->
+      <section class="py-12 bg-[#5B3926] text-[#fff] text-center">
+        <h2 class="mb-6 text-4xl font-bold">We Value Your Feedback</h2>
+        <p class="mb-4 text-lg">How was your experience with us?</p>
+    
+      <div class="flex justify-center mb-6">
+        <button 
+          v-for="star in 5" 
+          :key="star" 
+          @click="setRating(star)" 
+          class="text-3xl text-white transition duration-300 hover:text-yellow-500"
+          :class="{ 'text-yellow-500': rating >= star }">
+          ★
+        </button>
+      </div>
+    
+      <form class="max-w-3xl mx-auto" @submit.prevent="submitFeedback">
+        <!-- Error/Success Messages -->
+        <div v-if="feedbackError" class="px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
+          {{ feedbackError }}
         </div>
-        <form class="max-w-3xl mx-auto">
+        <div v-if="feedbackSuccess" class="px-4 py-3 mb-4 text-green-700 bg-green-100 border border-green-400 rounded">
+          {{ feedbackSuccess }}
+        </div>
+      
+        <!-- Feedback text area -->
         <textarea 
+          v-model="feedbackText"
           class="w-full p-4 mb-4 border-2 border-[#5B3926] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A67C52] text-[#5B3926]" 
           rows="5" 
-          placeholder="Write your feedback here...">
+          placeholder="Write your feedback here..."
+          required>
         </textarea>
+      
+        <!-- Submit button -->
         <button 
           type="submit" 
-          class="px-6 py-3 text-lg font-semibold text-[#5B3926] bg-[#ffffff] rounded-lg hover:bg-[#A67C52] transition duration-300">
-          Submit Feedback
+          class="px-6 py-3 text-lg font-semibold text-[#5B3926] bg-[#ffffff] rounded-lg hover:bg-[#A67C52] transition duration-300"
+          :disabled="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit Feedback' }}
         </button>
-        </form>
-        </section>
-
-
+      </form>
+    </section>
+  
       <!-- Footer -->
         <footer class="text-sm text-[#5B3926] py-2 border-t-4 border-[#5B3926]">
           <div class="flex flex-col items-center justify-between px-6 mx-auto max-w-7xl md:flex-row">
