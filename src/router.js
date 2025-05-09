@@ -6,6 +6,7 @@ import SomedayBrews from './views/Somedays.vue';
 import HeBrewsSheBakes from './views/HBSB.vue';
 import ButFirstCoffee from './views/BFC.vue';
 import UserProfile from './views/UserProfile.vue';
+import SignUp from './views/SignUp.vue';
 
 const routes = [
   { path: '/', redirect: '/home' },
@@ -16,6 +17,8 @@ const routes = [
   { path: '/he-brews-she-bakes', name: 'heBrewsSheBakes', component: HeBrewsSheBakes },
   { path: '/but-first-coffee', name: 'butFirstCoffee', component: ButFirstCoffee },
   { path: '/profile', name: 'userProfile', component: UserProfile },
+  { path: '/signup', name: 'SignUp', component: SignUp }
+    
 ];
 
 const router = createRouter({
