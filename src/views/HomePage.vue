@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useUserStore } from '@/stores/user';
 
 import homeCoffee from '/home-coffee.png';
 import aboutCoffee from '/about-coffee.png';
@@ -10,7 +11,9 @@ import hbsb from '/HBSB.jpg';
 import bfc from '/bfc.jpg';
 
 const router = useRouter();
+const userStore = useUserStore();
 const searchQuery = ref("");
+const showLoginMessage = ref(false);
 
 const cafes = ref([
   { name: "Tinatangi Café", img: tinatangi, route: "/tinatangi" },
@@ -19,6 +22,11 @@ const cafes = ref([
   { name: "But First Coffee", img: bfc, route: "/but-first-coffee" }
 ]);
 const filteredCafes = ref([]);  // Make filteredCafes reactive
+
+// Feedback data
+const feedbacks = ref([]);
+// const isLoadingFeedback = ref(false);
+// const feedbackError = ref('');
 
 async function fetchCafes() {
   try {
@@ -29,6 +37,27 @@ async function fetchCafes() {
     filterCafe();  // Immediately filter cafes after fetching them
   } catch (error) {
     console.error('Error:', error);
+  }
+}
+
+// Fetch feedback function
+async function fetchFeedbacks() {
+  isLoadingFeedback.value = true;
+  try {
+    const response = await fetch('http://127.0.0.1:8000/reviews/');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch feedback');
+    }
+    
+    const data = await response.json();
+    feedbacks.value = data.results || data; // Depending on API response format
+    
+  } catch (error) {
+    console.error('Error fetching feedback:', error);
+    feedbackError.value = 'Unable to load feedback. Please try again later.';
+  } finally {
+    isLoadingFeedback.value = false;
   }
 }
 
@@ -45,22 +74,33 @@ watch(searchQuery, (newQuery) => {
   scrollToDirectory(); // Scroll to Café Directory
 });
 
-
-fetchCafes();  // Initial fetch
+onMounted(() => {
+  fetchCafes();
+  fetchFeedbacks();
+});
 
 const goToLogin = () => {
   router.push({ name: 'login' });
 };
 
-const goToProfile = () => {
-  router.push({ name: 'UserProfile' });
+const handleProfileClick = () => {
+  if (userStore.token) {
+    // User is logged in, redirect to profile
+    router.push({ name: 'UserProfile' });
+  } else {
+    // User is not logged in, show message and redirect after delay
+    showLoginMessage.value = true;
+    setTimeout(() => {
+      showLoginMessage.value = false;
+      router.push({ name: 'login' });
+    }, 2000); 
+  }
 };
 
 defineExpose({
-  goToProfile,
+  handleProfileClick,
   goToLogin
 });
-
 
 function scrollToDirectory() {
   const section = document.getElementById("cafe-directory");
@@ -69,8 +109,18 @@ function scrollToDirectory() {
   }
 }
 
-</script>
+// Format date helper function
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+}
 
+</script>
 
 <template>
   <div class="min-h-screen font-serif text-[#5B3926] bg-[#F5EDE0] text-base">
@@ -95,10 +145,18 @@ function scrollToDirectory() {
               class="px-4 py-2 text-sm border rounded-full w-36 md:w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]" />
           </div>
 
-          <button @click="$router.push('/profile')"
-            class="px-4 py-1 bg-[#5B3926] text-white rounded-full hover:bg-[#A67C52] transition duration-300">
-            Profile
-          </button>
+          <div class="relative">
+            <button @click="handleProfileClick"
+              class="px-4 py-1 bg-[#5B3926] text-white rounded-full hover:bg-[#A67C52] transition duration-300">
+              Profile
+            </button>
+            
+            <!-- Login Message Alert -->
+            <div v-if="showLoginMessage" 
+                class="absolute right-0 mt-2 px-4 py-2 text-sm text-white bg-[#A67C52] rounded-md shadow-lg z-50 whitespace-nowrap">
+              Sign Up first... Redirecting to login page
+            </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -184,52 +242,53 @@ function scrollToDirectory() {
     </section>
 
     <!-- Feedback Section -->
-    <section id="feedbacks" class="py-32 px-8 bg-[#F8F5F0]">
-      <div class="max-w-6xl mx-auto">
-        <h2 class="mb-10 text-4xl font-bold text-center text-[#5B3926]">Feedbacks</h2>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-
-          <div class="bg-white text-[#5B3926] p-6 rounded-lg shadow">
-            <div class="flex items-center mb-2">
-              <span class="mr-2 text-2xl">☕</span>
-              <h3 class="font-semibold">Supreme Beans</h3>
+  <section id="feedbacks" class="py-32 px-8 bg-[#F8F5F0]">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="mb-10 text-4xl font-bold text-center text-[#5B3926]">Feedbacks</h2>
+      
+      <!-- Loading state -->
+      <div v-if="isLoadingFeedback" class="text-center">
+        <p class="text-[#5B3926]">Loading feedbacks...</p>
+      </div>
+      
+      <!-- Error state -->
+      <div v-else-if="feedbackError" class="text-center">
+        <p class="text-red-600">{{ feedbackError }}</p>
+      </div>
+      
+      <!-- No feedback state -->
+      <div v-else-if="feedbacks.length === 0" class="text-center">
+        <p class="text-[#5B3926]">No feedback available yet. Be the first to share your experience!</p>
+      </div>
+      
+      <!-- Display feedbacks -->
+      <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
+        <div 
+          v-for="feedback in feedbacks.slice(0, 4)" 
+          :key="feedback.id" 
+          class="bg-white text-[#5B3926] p-6 rounded-lg shadow"
+        >
+          <div class="flex items-center mb-2">
+            <div class="mr-2 text-yellow-500">
+              <span v-for="i in feedback.rating" :key="i">★</span>
+              <span v-for="i in 5-feedback.rating" :key="i+5" class="text-gray-300">★</span>
             </div>
-            <p>Best coffee shop in town!</p>
+            <h3 class="font-semibold">{{ feedback.cafe || 'Café' }}</h3>
           </div>
-
-          <div class="bg-white text-[#5B3926] p-10 rounded-xl shadow">
-            <div class="flex items-center mb-2">
-              <span class="mr-2 text-2xl">☕</span>
-              <h3 class="font-semibold">High Quality</h3>
-            </div>
-            <p>Exceptional taste and texture.</p>
-          </div>
-
-          <div class="bg-white text-[#5B3926] p-6 rounded-lg shadow">
-            <div class="flex items-center mb-2">
-              <span class="mr-2 text-2xl">☕</span>
-              <h3 class="font-semibold">Extraordinary</h3>
-            </div>
-            <p>Nothing compares to this coffee.</p>
-          </div>
-
-          <div class="bg-white text-[#5B3926] p-6 rounded-lg shadow">
-            <div class="flex items-center mb-2">
-              <span class="mr-2 text-2xl">☕</span>
-              <h3 class="font-semibold">Affordable Price</h3>
-            </div>
-            <p>Worth every penny.</p>
-          </div>
-
-        </div>
-        <div class="flex justify-center mt-10">
-          <button @click="goToLogin"
-            class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300">
-            Get Started
-          </button>
+          <p class="mb-2 text-sm text-gray-500">{{ feedback.user_name || 'Customer' }}</p>
+          <p>{{ feedback.comment }}</p>
+          <p class="mt-2 text-xs text-right text-gray-500">{{ formatDate(feedback.created_at) }}</p>
         </div>
       </div>
-    </section>
+      
+      <div class="flex justify-center mt-10">
+        <button @click="goToLogin"
+          class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300">
+          Get Started
+        </button>
+      </div>
+    </div>
+  </section>
 
     <!-- Footer -->
     <footer class="bg-[#5B3926] text-white py-10 mt-0 text-center">

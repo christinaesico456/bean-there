@@ -2,28 +2,39 @@
   <div class="flex h-screen">
     <!-- Left Side - Image -->
     <div class="w-1/2 bg-center bg-cover" style="background-image: url('/login-coffee.png');"></div>
-
     <!-- Right Side - Form -->
     <div class="w-1/2 bg-[#2D1B15] flex flex-col justify-center items-center text-white px-10">
       <!-- Logo -->
       <div class="mb-8">
         <div class="flex items-center justify-center w-20 h-20 bg-gray-300 rounded-full">
-          <span class="text-black">LOGO</span>
+          <div><img src="/beanthere-logo.png" alt="Bean There Logo" class="h-auto w-13"></div>
         </div>
       </div>
-
       <!-- Login Form -->
       <div class="w-full max-w-md">
-        <input v-model="usernameOrEmail" type="email" placeholder="email" class="w-full p-3 mb-4 text-black bg-white rounded" />
-        <input v-model="password" type="password" placeholder="password" class="w-full p-3 mb-2 text-black bg-white rounded" />
-        <div class="mb-4 text-xs text-right text-gray-400 cursor-pointer">Forgot password?</div>
-
-        <button @click="login" class="w-full bg-[#A37550] text-white py-3 rounded hover:bg-[#8B5E3B]">
-          Sign in
+        <input 
+          v-model="usernameOrEmail" 
+          type="text" 
+          placeholder="Username or Email" 
+          class="w-full p-3 mb-4 text-black bg-white rounded" 
+        />
+        <input 
+          v-model="password" 
+          type="password" 
+          placeholder="Password" 
+          class="w-full p-3 mb-2 text-black bg-white rounded" 
+        />
+        <div v-if="errorMessage" class="mb-4 text-sm text-red-400">{{ errorMessage }}</div>
+        <div v-if="successMessage" class="mb-4 text-sm text-green-400">{{ successMessage }}</div>
+        <button 
+          @click="login" 
+          class="w-full bg-[#A37550] text-white py-3 rounded hover:bg-[#8B5E3B]"
+          :disabled="isLoading"
+        >
+          <span v-if="isLoading">Signing in...</span>
+          <span v-else>Sign in</span>
         </button>
-
         <div class="my-4 text-center">Or</div>
-
         <router-link to="/signup" class="w-full">
           <button class="w-full py-3 border border-white rounded">
             Create an account
@@ -46,22 +57,70 @@ const userStore = useUserStore()
 const usernameOrEmail = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const successMessage = ref('')
+const isLoading = ref(false)
 
 const login = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+  
+  // Form validation
+  if (!usernameOrEmail.value || !password.value) {
+    errorMessage.value = 'Please enter both username/email and password.'
+    return
+  }
+  
+  isLoading.value = true
+  
   try {
-    const response = await axios.post('http://localhost:8000/api/login/', {
+    // Send request to backend with the correct URL
+    const response = await axios.post('http://127.0.0.1:8000/accounts/login/', {
       username: usernameOrEmail.value,
       password: password.value,
     })
-
-    const token = response.data.token
-    localStorage.setItem('token', token)
-    userStore.setToken(token)
-
-    router.push('/profile')
+    
+    console.log('Login successful:', response.data)
+    successMessage.value = 'Login successful!'
+    
+    // Extract token from response
+    const token = response.data.token || response.data.access || response.data.key
+    
+    // Store token
+    if (token) {
+      // Store token in user store
+      userStore.setToken(token)
+      
+      // Fetch user profile data
+      await userStore.fetchUserProfile()
+      
+      // Redirect after successful login
+      router.push('/profile')
+    } else {
+      console.warn('No token found in response:', response.data)
+      errorMessage.value = 'Login successful but no authentication token received.'
+    }
   } catch (error) {
-    errorMessage.value =
-      error.response?.data?.detail || 'Login failed. Please try again.'
+    console.error('Login error:', error)
+    
+    if (error.response && error.response.data) {
+      if (typeof error.response.data === 'object') {
+        if (error.response.data.non_field_errors) {
+          errorMessage.value = error.response.data.non_field_errors[0]
+        } else if (error.response.data.detail) {
+          errorMessage.value = error.response.data.detail
+        } else if (error.response.data.error) {
+          errorMessage.value = error.response.data.error
+        } else {
+          errorMessage.value = 'Invalid credentials. Please try again.'
+        }
+      } else {
+        errorMessage.value = error.response.data || 'Login failed. Please try again.'
+      }
+    } else {
+      errorMessage.value = 'Network error. Please try again later.'
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

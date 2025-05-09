@@ -1,24 +1,51 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-    <h1 class="mb-6 text-2xl font-bold">Create an Account</h1>
-    <form @submit.prevent="handleSubmit" class="p-8 bg-white rounded shadow-md w-96">
-      <input v-model="firstName" type="text" placeholder="First Name" class="w-full p-2 mb-4 border rounded" />
-      <input v-model="lastName" type="text" placeholder="Last Name" class="w-full p-2 mb-4 border rounded" />
-      <input v-model="email" type="email" placeholder="Email" class="w-full p-2 mb-4 border rounded" />
-      <input v-model="username" type="text" placeholder="Username" class="w-full p-2 mb-4 border rounded" />
-      <input v-model="phone" type="text" placeholder="Phone Number" class="w-full p-2 mb-4 border rounded" />
-      <input v-model="password" type="password" placeholder="Password" class="w-full p-2 mb-4 border rounded" />
-      <input v-model="confirmPassword" type="password" placeholder="Confirm Password" class="w-full p-2 mb-6 border rounded" />
+  <div class="flex h-screen">
+    <!-- Left Side - Image -->
+    <div class="w-1/2 bg-center bg-cover" style="background-image: url('/login-coffee.png');"></div>
 
-      <p v-if="errorMessage" class="mb-4 text-sm text-red-500">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="mb-4 text-sm text-green-500">{{ successMessage }}</p>
+    <!-- Right Side - Form -->
+    <div class="w-1/2 bg-[#2D1B15] flex flex-col justify-center px-16 text-white">
+      <h1 class="mb-8 text-4xl font-bold text-center">Sign up</h1>
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div>
+          <label class="block mb-1">Full Name</label>
+          <input v-model="fullName" type="text" placeholder="Name..." class="w-full px-4 py-2 rounded bg-[#5B4642] text-white placeholder-gray-300" />
+        </div>
+        <div>
+          <label class="block mb-1">Email</label>
+          <input v-model="email" type="email" placeholder="Email Address..." class="w-full px-4 py-2 rounded bg-[#5B4642] text-white placeholder-gray-300" />
+        </div>
+        <div>
+          <label class="block mb-1">Username</label>
+          <input v-model="username" type="text" placeholder="Username..." class="w-full px-4 py-2 rounded bg-[#5B4642] text-white placeholder-gray-300" />
+        </div>
+        <div>
+          <label class="block mb-1">Phone Number</label>
+          <input v-model="phone" type="text" placeholder="Phone Number..." class="w-full px-4 py-2 rounded bg-[#5B4642] text-white placeholder-gray-300" />
+        </div>
+        <div>
+          <label class="block mb-1">Password</label>
+          <input v-model="password" type="password" placeholder="**********" class="w-full px-4 py-2 rounded bg-[#5B4642] text-white placeholder-gray-300" />
+        </div>
+        <div>
+          <label class="block mb-1">Confirm Password</label>
+          <input v-model="confirmPassword" type="password" placeholder="**********" class="w-full px-4 py-2 rounded bg-[#5B4642] text-white placeholder-gray-300" />
+        </div>
 
-      <button type="submit" class="w-full p-2 text-white bg-blue-500 rounded hover:bg-blue-600">
-        Sign Up
-      </button>
-    </form>
+        <div v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</div>
+        <div v-if="successMessage" class="text-sm text-green-400">{{ successMessage }}</div>
+
+        <button type="submit" class="w-full py-2 mt-4 bg-[#A87C4F] hover:bg-[#996840] text-white font-semibold rounded">
+          Sign up
+        </button>
+        <p class="mt-2 text-sm text-center">
+        <router-link to="/login" class="underline hover:text-gray-300">Log in</router-link>
+        </p>
+      </form>
+    </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue'
@@ -54,7 +81,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost:8000/register/', {
+    const response = await axios.post('http://127.0.0.1:8000/accounts/register/', {
       first_name: firstName.value,
       last_name: lastName.value,
       email: email.value,
@@ -63,10 +90,29 @@ const handleSubmit = async () => {
       password: password.value,
     })
 
+    console.log('Registration response:', response.data)
     successMessage.value = 'Account created successfully! Redirecting to login...'
     setTimeout(() => router.push('/login'), 2000)
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Registration failed.'
+    console.error('Registration error:', error)
+
+    if (error.response && error.response.data) {
+      if (typeof error.response.data === 'object') {
+        if (error.response.data.email) {
+          errorMessage.value = 'Email error: ${error.response.data.email[0]}'
+        } else if (error.response.data.username) {
+          errorMessage.value = 'Username error: ${error.response.data.username[0]}'
+        } else if (error.response.data.error) {
+          errorMessage.value = error.response.data.error
+        } else if (error.response.data.detail) {
+          errorMessage.value = error.response.data.detail
+        } else {
+          errorMessage.value = 'Registration failed. Please check your information.'
+        }
+      } else {
+        errorMessage.value = 'Network error. Please try again later.'
+      }
+    }
   }
 }
 </script> 
