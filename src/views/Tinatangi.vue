@@ -20,6 +20,13 @@ const images = [
 const router = useRouter();
 const userStore = useUserStore();
 
+onMounted(() => {
+  const header = document.querySelector('header');
+  if (header) {
+    header.scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
 const isHeartClicked = ref(false);
 const CAFE_ID = 1; 
 
@@ -170,8 +177,8 @@ onMounted(() => {
 
     <!-- Navigation -->
         <div class="hidden space-x-6 text-lg md:flex">
-          <a href="#" @click="router.push('/home')" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Home</a>
-          <a href="#cafe-directory" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Café Directory</a>
+          <a href="#" @click.prevent="router.push('/home')" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Home</a>
+          <a href="#feedback" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Feedback</a>
           <a href="#menu" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">Menu</a>
           <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">About</a>
         </div>
@@ -185,8 +192,9 @@ onMounted(() => {
 
     <!-- Header -->
         <header 
-          class="relative h-[750px] bg-cover bg-center text-white flex items-center justify-center text-7xl font-bold"
+          class="relative flex items-center justify-center h-screen font-bold text-white bg-center bg-cover text-7xl"
           style="background-image: url('/tinatangibg.jpg'); background-size: cover; background-position: center;">
+
   
     <!-- Dark overlay for better text visibility -->
         <div class="absolute inset-0 bg-black bg-opacity-30"></div>
@@ -223,6 +231,7 @@ onMounted(() => {
         </section>
 
     <!-- About -->
+        <section id="about" class="py-12 bg-[#5B3926] text-[#ffffff] text-center"></section>
         <div class="flex justify-center items-center bg-[#5B3926] h-[550px] px-">
         <div class="flex flex-col items-center w-full max-w-5xl space-x-12 md:flex-row">
     
@@ -295,7 +304,7 @@ onMounted(() => {
     <!--MENU-->
 
       <!--Coffee Based-->
-        <section class="py-2 bg-[#5B3926] text-white">
+        <section id="menu" class="py-2 bg-[#5B3926] text-white">
           <h1 class="mb-10 text-5xl font-bold text-center">OUR MENU</h1>
           <hr class="w-20 mx-auto mb-8 border-t-4 border-white">
                 <h2 class="mb-10 text-4xl font-bold text-center">Coffee Based</h2>
@@ -563,7 +572,7 @@ onMounted(() => {
       </section>
 
        <!-- Feedback Section -->
-      <section class="py-12 bg-[#5B3926] text-[#fff] text-center">
+      <section id="feedback" class="py-12 bg-[#5B3926] text-[#fff] text-center">
         <h2 class="mb-6 text-4xl font-bold">We Value Your Feedback</h2>
         <p class="mb-4 text-lg">How was your experience with us?</p>
     
@@ -596,7 +605,7 @@ onMounted(() => {
           required>
         </textarea>
       
-        <!-- Submit button -->
+         <!-- Submit button -->
         <button 
           type="submit" 
           class="px-6 py-3 text-lg font-semibold text-[#5B3926] bg-[#ffffff] rounded-lg hover:bg-[#A67C52] transition duration-300"
