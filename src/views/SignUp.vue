@@ -51,8 +51,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user' 
 
 const router = useRouter()
+const userStore = useUserStore()
 
 // Form fields
 const fullName = ref('')
@@ -63,6 +65,7 @@ const password = ref('')
 const confirmPassword = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+const isSubmitting = ref(false)
 
 // Form submission handler
 const handleSubmit = async () => {
@@ -77,6 +80,8 @@ const handleSubmit = async () => {
     return
   }
 
+ isSubmitting.value = true 
+
   try {
     const nameParts = fullName.value.trim().split(' ')
     const firstName = nameParts[0] || ''
@@ -89,11 +94,31 @@ const handleSubmit = async () => {
       username: username.value,
       phone: phone.value,
       password: password.value,
+    }, {
+      // Add proper headers
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     })
 
     console.log('Registration response:', response.data)
     successMessage.value = 'Account created successfully! Redirecting to login...'
-    setTimeout(() => router.push('/login'), 2000)
+    
+    // Auto login if the API returns a token
+    if (response.data && response.data.token) {
+      userStore.setToken(response.data.token)
+      userStore.setUser({
+        username: username.value,
+        email: email.value,
+        first_name: firstName,
+        last_name: lastName
+      })
+      setTimeout(() => router.push('/'), 2000) // Redirect to home instead of login
+    } else {
+      // Otherwise redirect to login
+      setTimeout(() => router.push('/login'), 2000)
+    }
   } catch (error) {
     console.error('Registration error:', error)
 
@@ -116,6 +141,8 @@ const handleSubmit = async () => {
     } else {
       errorMessage.value = 'Network error. Please try again later.'
     }
+  } finally {
+    isSubmitting.value = false // End loading state
   }
 }
 </script>
