@@ -65,12 +65,8 @@ const confirmPassword = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 
-// Submit function
-const handleSubmit = async () => {
-  errorMessage.value = ''
-  successMessage.value = ''
-
-  if (!firstName.value || !lastName.value || !email.value || !username.value || !phone.value || !password.value || !confirmPassword.value) {
+// Form validation
+  if (!fullName.value || !email.value || !username.value || !phone.value || !password.value || !confirmPassword.value) {
     errorMessage.value = 'All fields are required.'
     return
   }
@@ -81,9 +77,13 @@ const handleSubmit = async () => {
   }
 
   try {
+    const nameParts = fullName.value.trim().split(' ')
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+
     const response = await axios.post('http://127.0.0.1:8000/accounts/register/', {
-      first_name: firstName.value,
-      last_name: lastName.value,
+      first_name: firstName,
+      last_name: lastName,
       email: email.value,
       username: username.value,
       phone: phone.value,
@@ -99,9 +99,9 @@ const handleSubmit = async () => {
     if (error.response && error.response.data) {
       if (typeof error.response.data === 'object') {
         if (error.response.data.email) {
-          errorMessage.value = 'Email error: ${error.response.data.email[0]}'
+          errorMessage.value = `Email error: ${error.response.data.email[0]}`
         } else if (error.response.data.username) {
-          errorMessage.value = 'Username error: ${error.response.data.username[0]}'
+          errorMessage.value = `Username error: ${error.response.data.username[0]}`
         } else if (error.response.data.error) {
           errorMessage.value = error.response.data.error
         } else if (error.response.data.detail) {
@@ -110,9 +110,10 @@ const handleSubmit = async () => {
           errorMessage.value = 'Registration failed. Please check your information.'
         }
       } else {
-        errorMessage.value = 'Network error. Please try again later.'
+        errorMessage.value = 'Registration failed. Please try again.'
       }
+    } else {
+      errorMessage.value = 'Network error. Please try again later.'
     }
   }
-}
-</script> 
+</script>
