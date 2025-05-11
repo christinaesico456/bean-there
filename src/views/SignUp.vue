@@ -55,8 +55,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 // Form fields
-const firstName = ref('')
-const lastName = ref('')
+const fullName = ref('')
 const email = ref('')
 const username = ref('')
 const phone = ref('')
@@ -65,7 +64,9 @@ const confirmPassword = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 
-// Form validation
+// Form submission handler
+const handleSubmit = async () => {
+  // Form validation
   if (!fullName.value || !email.value || !username.value || !phone.value || !password.value || !confirmPassword.value) {
     errorMessage.value = 'All fields are required.'
     return
@@ -116,4 +117,5 @@ const successMessage = ref('')
       errorMessage.value = 'Network error. Please try again later.'
     }
   }
+}
 </script>

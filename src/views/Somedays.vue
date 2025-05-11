@@ -16,14 +16,49 @@ const images = [
 const router = useRouter();
 const userStore = useUserStore();
 
-const handleHeartClick = () => {
-  alert('Heart button clicked!');
+const isHeartClicked = ref(false);
+const CAFE_ID = 1; 
+
+onMounted(() => {
+  const header = document.querySelector('header');
+  if (header) {
+    header.scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+const checkFavoriteStatus = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:8000/favorite/user/', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    // Check if this cafe is in the user's favorites
+    const favorites = response.data;
+    isHeartClicked.value = favorites.some(favorite => favorite.cafe.id === CAFE_ID);
+  } catch (error) {
+    console.error('Error checking favorite status:', error);
+  }
 };
 
-const isHeartClicked = ref(false);
-
-const toggleHeart = () => {
-  isHeartClicked.value = !isHeartClicked.value;
+// Toggle favorite status
+const toggleHeart = async () => {
+  try {
+    // Call the toggle endpoint
+    await axios.post(`http://127.0.0.1:8000/favorite/toggle/${CAFE_ID}/`, {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    // Toggle the heart state locally
+    isHeartClicked.value = !isHeartClicked.value;
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    // Show error message to user
+    alert('Please log in to add this cafe to your favorites');
+  }
 };
 
 const rating = ref(0);
@@ -31,7 +66,6 @@ const feedbackText = ref('');
 const isSubmitting = ref(false);
 const feedbackError = ref('');
 const feedbackSuccess = ref('');
-
 
 const setRating = (star) => {
   rating.value = star;
@@ -131,8 +165,8 @@ const offerings = [
 
     <!-- Navigation -->
         <div class="hidden space-x-6 text-lg md:flex">
-          <a href="#" @click="router.push('/home')" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">Home</a>
-          <a href="#cafe-directory" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">Café Directory</a>
+          <a href= "#" @click.prevent="router.push('/home')" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">Home</a>
+          <a href="#feedback" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">Feedback</a>
           <a href="#menu" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">Menu</a>
           <a href="#about" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">About</a>
         </div>
@@ -145,7 +179,7 @@ const offerings = [
 
     <!-- Header -->
         <header 
-          class="relative flex items-center justify-center h-screen font-bold text-white bg-center bg-no-repeat bg-cover text-7xl"
+          class="relative flex items-center justify-center h-screen font-bold text-white bg-center bg-cover text-7xl"
           style="background-image: url('/sbr2.jpg'); background-size: cover; background-position: center;">
   
     <!-- Dark overlay for better text visibility -->
@@ -182,6 +216,7 @@ const offerings = [
         </section>
 
     <!-- About -->
+        <section id="about" class="py-10 bg-[#003366] text-white"></section>
         <div class="flex justify-center items-center bg-[#003366] h-[550px] px-8">
         <div class="flex flex-col items-center w-full max-w-5xl space-x-12 md:flex-row">
     
@@ -219,9 +254,9 @@ const offerings = [
     </section>
 
     <!-- Photo Gallery -->
-    <section class="py-12 bg-[#003366] text-[#ffffff] text-center">
-      <h2 class="mb-2 text-4xl font-bold">Gallery</h2>
-    <div class="flex justify-center items-center h-screen bg-[#5B3926]-900 py-4">
+    <section class="py-10 bg-[#003366] text-[#ffffff] text-center">
+      <h2 class="mb-0 text-4xl font-bold">Gallery</h2>
+    <div class="flex justify-center items-center h-[800px] bg-[#5B3926]-900">
 
     <Swiper
       :modules="[EffectCoverflow, Pagination]"
@@ -248,7 +283,7 @@ const offerings = [
 
 <!--MENU-->
     <!--Coffee Based-->
-      <section class="py-2 bg-[#003366] text-white">
+      <section id="menu" class="py-2 bg-[#003366] text-white">
           <h1 class= "mb-10 text-5xl font-bold text-center">OUR MENU</h1>
           <hr class="w-20 mx-auto mb-8 border-t-4 border-white">
           <h2 class="mb-8 text-4xl font-bold text-center">ESPRESSO (HOT/ICED)</h2>
@@ -673,7 +708,7 @@ const offerings = [
 
 
      <!-- Feedback Section -->
-     <section class="py-16 bg-[#003366] text-[#fff] text-center">
+     <section id="feedback" class="py-16 bg-[#003366] text-[#fff] text-center">
           <h2 class="mb-6 text-4xl font-bold">We Value Your Feedback</h2>
           <p class="mb-4 text-lg">How was your experience with us?</p>
 
@@ -706,15 +741,15 @@ const offerings = [
           <required>
         </textarea>
 
-        <!-- Submit Button -->
+        <!-- Submit button -->
         <button 
           type="submit" 
-          class="px-6 py-3 text-lg font-semibold text-[#003366] bg-[#ffffff] rounded-lg hover:bg-[#88cfff] transition duration-300">
+          class="px-6 py-3 text-lg font-semibold text-[#003366] bg-[#ffffff] rounded-lg hover:bg-[#88cfff] transition duration-300"
           :disabled="isSubmitting">
           {{ isSubmitting ? 'Submitting...' : 'Submit Feedback' }}
         </button>
-        </form>
-        </section>
+      </form>
+    </section>
 
 
       <!-- Footer -->
