@@ -25,8 +25,8 @@ const filteredCafes = ref([]);  // Make filteredCafes reactive
 
 // Feedback data
 const feedbacks = ref([]);
-// const isLoadingFeedback = ref(false);
-// const feedbackError = ref('');
+const isLoadingFeedback = ref(false);
+const feedbackError = ref('');
 
 async function fetchCafes() {
   try {
@@ -80,8 +80,13 @@ onMounted(() => {
 });
 
 const goToLogin = () => {
-  router.push({ name: 'login' });
+  if (userStore.token) {
+    router.push({ name: 'feedbacks' }); 
+  } else {
+    router.push({ name: 'login' });
+  }
 };
+
 
 const handleProfileClick = () => {
   if (userStore.token) {
@@ -241,54 +246,56 @@ function formatDate(dateString) {
       </div>
     </section>
 
-    <!-- Feedback Section -->
+   <!-- Feedback Section -->
   <section id="feedbacks" class="py-32 px-8 bg-[#F8F5F0]">
     <div class="max-w-6xl mx-auto">
       <h2 class="mb-10 text-4xl font-bold text-center text-[#5B3926]">Feedbacks</h2>
-      
-      <!-- Loading state -->
-      <div v-if="isLoadingFeedback" class="text-center">
-        <p class="text-[#5B3926]">Loading feedbacks...</p>
-      </div>
-      
-      <!-- Error state -->
-      <div v-else-if="feedbackError" class="text-center">
-        <p class="text-red-600">{{ feedbackError }}</p>
-      </div>
-      
-      <!-- No feedback state -->
-      <div v-else-if="feedbacks.length === 0" class="text-center">
-        <p class="text-[#5B3926]">No feedback available yet. Be the first to share your experience!</p>
-      </div>
-      
-      <!-- Display feedbacks -->
-      <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-        <div 
-          v-for="feedback in feedbacks.slice(0, 4)" 
-          :key="feedback.id" 
-          class="bg-white text-[#5B3926] p-6 rounded-lg shadow"
-        >
-          <div class="flex items-center mb-2">
-            <div class="mr-2 text-yellow-500">
-              <span v-for="i in feedback.rating" :key="i">★</span>
-              <span v-for="i in 5-feedback.rating" :key="i+5" class="text-gray-300">★</span>
-            </div>
-            <h3 class="font-semibold">{{ feedback.cafe || 'Café' }}</h3>
+
+    <!-- Loading state -->
+    <div v-if="isLoadingFeedback" class="text-center">
+      <p class="text-[#5B3926]">Loading feedbacks...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div v-else-if="feedbackError" class="text-center">
+      <p class="text-red-600">{{ feedbackError }}</p>
+    </div>
+    
+    <!-- No feedback state -->
+    <div v-else-if="feedbacks.length === 0" class="text-center">
+      <p class="text-[#5B3926]">No feedback available yet. Be the first to share your experience!</p>
+    </div>
+    
+    <!-- Display feedbacks -->
+    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
+      <div 
+        v-for="feedback in feedbacks.slice(0, 4)" 
+        :key="feedback.id" 
+        class="bg-white text-[#5B3926] p-6 rounded-lg shadow"
+      >
+        <div class="flex items-center mb-2">
+          <div class="mr-2 text-yellow-500">
+            <span v-for="i in feedback.rating" :key="i">★</span>
+            <span v-for="i in 5 - feedback.rating" :key="i + 5" class="text-gray-300">★</span>
           </div>
-          <p class="mb-2 text-sm text-gray-500">{{ feedback.user_name || 'Customer' }}</p>
-          <p>{{ feedback.comment }}</p>
-          <p class="mt-2 text-xs text-right text-gray-500">{{ formatDate(feedback.created_at) }}</p>
+          <h3 class="font-semibold">{{ feedback.cafe || 'Café' }}</h3>
         </div>
-      </div>
-      
-      <div class="flex justify-center mt-10">
-        <button @click="goToLogin"
-          class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300">
-          Get Started
-        </button>
+        <p class="mb-2 text-sm text-gray-500">{{ feedback.user_name || 'Customer' }}</p>
+        <p>{{ feedback.comment }}</p>
+        <p class="mt-2 text-xs text-right text-gray-500">{{ formatDate(feedback.created_at) }}</p>
       </div>
     </div>
-  </section>
+    
+    <!-- Button to Write Feedback for logged-in users -->
+    <div v-if="!userStore.token" class="flex justify-center mt-10">
+      <button @click="goToLogin"
+        class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300">
+        Get Started
+      </button>
+    </div>
+  </div>
+</section>
+
 
     <!-- Footer -->
     <footer class="bg-[#5B3926] text-white py-10 mt-0 text-center">

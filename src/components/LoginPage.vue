@@ -13,9 +13,9 @@
       <!-- Login Form -->
       <div class="w-full max-w-md">
         <input 
-          v-model="usernameOrEmail" 
+          v-model="username" 
           type="text" 
-          placeholder="Username or Email" 
+          placeholder="Username" 
           class="w-full p-3 mb-4 text-black bg-white rounded" 
         />
         <input 
@@ -54,7 +54,7 @@ import { useUserStore } from '@/stores/user'
 const router = useRouter()
 const userStore = useUserStore()
 
-const usernameOrEmail = ref('')
+const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -72,8 +72,8 @@ const login = async () => {
   successMessage.value = ''
   
   // Form validation
-  if (!usernameOrEmail.value || !password.value) {
-    errorMessage.value = 'Please enter both username/email and password.'
+  if (!username.value || !password.value) {
+    errorMessage.value = 'Please enter both username and password.'
     return
   }
   
@@ -82,7 +82,7 @@ const login = async () => {
   try {
     // Send request to backend with the correct URL
     const response = await axios.post('http://127.0.0.1:8000/accounts/login/', {
-      username: usernameOrEmail.value,
+      username: username.value,
       password: password.value,
     })
     
