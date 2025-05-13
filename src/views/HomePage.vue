@@ -1,7 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useUserStore } from '@/stores/user';
+import axios from 'axios';
 
 import homeCoffee from '/home-coffee.png';
 import aboutCoffee from '/about-coffee.png';
@@ -14,6 +15,14 @@ const router = useRouter();
 const userStore = useUserStore();
 const searchQuery = ref("");
 const showLoginMessage = ref(false);
+const showFeedback = ref(false);
+
+const cafeRating = ref(5);
+const cafeComment = ref('');
+const selectedCafe = ref(null);
+const submittingFeedback = ref(false);
+const feedbackSuccess = ref(false);
+const feedbackFormError = ref('');
 
 const cafes = ref([
   { name: "Tinatangi Café", img: tinatangi, route: "/tinatangi" },
@@ -79,11 +88,70 @@ onMounted(() => {
   fetchFeedbacks();
 });
 
+// Modified function to correctly check login status
 const goToLogin = () => {
-  if (userStore.token) {
-    router.push({ name: 'feedbacks' }); 
+  if (userStore.isLoggedIn) {
+    // Show the feedback form instead of redirecting
+    showFeedbackForm.value = true;
+    
+    // Smooth scroll to the feedback form section
+    setTimeout(() => {
+      const feedbackFormElement = document.getElementById("feedback-form");
+      if (feedbackFormElement) {
+        feedbackFormElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   } else {
-    router.push({ name: 'login' });
+    router.push('/login');
+  }
+};
+
+// Add a function to submit feedback
+const submitFeedback = async () => {
+  if (!selectedCafe.value) {
+    feedbackFormError.value = 'Please select a café';
+    return;
+  }
+  
+  if (!cafeComment.value.trim()) {
+    feedbackFormError.value = 'Please enter your feedback';
+    return;
+  }
+  
+  submittingFeedback.value = true;
+  feedbackFormError.value = '';
+  
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/reviews/', {
+      cafe: selectedCafe.value,
+      rating: cafeRating.value,
+      comment: cafeComment.value
+    }, {
+      headers: {
+        'Authorization': `Bearer ${userStore.token}`
+      }
+    });
+    
+    console.log('Feedback submitted:', response.data);
+    feedbackSuccess.value = true;
+    cafeComment.value = '';
+    cafeRating.value = 5;
+    selectedCafe.value = null;
+    
+    // Refresh feedbacks list
+    fetchFeedbacks();
+    
+    // Hide the form after submission
+    setTimeout(() => {
+      showFeedbackForm.value = false;
+      feedbackSuccess.value = false;
+    }, 3000);
+    
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    feedbackFormError.value = error.response?.data?.detail || 'Failed to submit feedback. Please try again.';
+  } finally {
+    submittingFeedback.value = false;
   }
 };
 

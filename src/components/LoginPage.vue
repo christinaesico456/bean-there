@@ -48,10 +48,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 const username = ref('')
@@ -63,7 +64,11 @@ const isLoading = ref(false)
 // Check if user is already logged in
 onMounted(() => {
   if (userStore.isLoggedIn) {
-    router.push('/home')
+    if (route.query.redirect) {
+      router.push(route.query.redirect.toString())
+    } else {
+      router.push('/home')
+    }
   }
 })
 
