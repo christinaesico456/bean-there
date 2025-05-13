@@ -69,6 +69,9 @@ const isSubmitting = ref(false)
 
 // Form submission handler
 const handleSubmit = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+
   // Form validation
   if (!fullName.value || !email.value || !username.value || !phone.value || !password.value || !confirmPassword.value) {
     errorMessage.value = 'All fields are required.'
@@ -92,8 +95,9 @@ const handleSubmit = async () => {
       last_name: lastName,
       email: email.value,
       username: username.value,
-      phone: phone.value,
+      phone_number: phone.value,
       password: password.value,
+      confirm_password: confirmPassword.value
     }, {
       // Add proper headers
       headers: {
@@ -105,44 +109,39 @@ const handleSubmit = async () => {
     console.log('Registration response:', response.data)
     successMessage.value = 'Account created successfully! Redirecting to login...'
     
-    // Auto login if the API returns a token
-    if (response.data && response.data.token) {
-      userStore.setToken(response.data.token)
-      userStore.setUser({
-        username: username.value,
-        email: email.value,
-        first_name: firstName,
-        last_name: lastName
-      })
-      setTimeout(() => router.push('/'), 2000) // Redirect to home instead of login
-    } else {
-      // Otherwise redirect to login
-      setTimeout(() => router.push('/login'), 2000)
-    }
-  } catch (error) {
-    console.error('Registration error:', error)
+    // Redirect to login page after successful signup
+    setTimeout(() => {
+      router.push('/login')
+    }, 2000)
 
-    if (error.response && error.response.data) {
-      if (typeof error.response.data === 'object') {
-        if (error.response.data.email) {
-          errorMessage.value = `Email error: ${error.response.data.email[0]}`
-        } else if (error.response.data.username) {
-          errorMessage.value = `Username error: ${error.response.data.username[0]}`
-        } else if (error.response.data.error) {
-          errorMessage.value = error.response.data.error
-        } else if (error.response.data.detail) {
-          errorMessage.value = error.response.data.detail
+    } catch (error) {
+    console.error('Registration error:', error)
+    
+    
+    if (error.response) {
+      if (error.response.data) {
+        const data = error.response.data
+        if (data.email) {
+          errorMessage.value = `Email: ${data.email[0]}`
+        } else if (data.username) {
+          errorMessage.value = `Username: ${data.username[0]}`
+        } else if (data.non_field_errors) {
+          errorMessage.value = data.non_field_errors[0]
+        } else if (data.detail) {
+          errorMessage.value = data.detail
         } else {
           errorMessage.value = 'Registration failed. Please check your information.'
         }
       } else {
-        errorMessage.value = 'Registration failed. Please try again.'
+        errorMessage.value = `Server error: ${error.response.status}`
       }
+    } else if (error.request) {
+      errorMessage.value = 'Network error. Please check your connection.'
     } else {
-      errorMessage.value = 'Network error. Please try again later.'
+      errorMessage.value = 'An unexpected error occurred.'
     }
   } finally {
-    isSubmitting.value = false // End loading state
+    isSubmitting.value = false
   }
 }
 </script>
