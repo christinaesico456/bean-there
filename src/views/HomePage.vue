@@ -15,7 +15,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const searchQuery = ref("");
 const showLoginMessage = ref(false);
-const showFeedback = ref(false);
+const showFeedbackForm = ref(false);
 
 const cafeRating = ref(5);
 const cafeComment = ref('');
@@ -93,6 +93,7 @@ const goToLogin = () => {
   if (userStore.isLoggedIn) {
     // Show the feedback form instead of redirecting
     showFeedbackForm.value = true;
+    showFeedbackForm.value = true;
     
     // Smooth scroll to the feedback form section
     setTimeout(() => {
@@ -128,7 +129,7 @@ const submitFeedback = async () => {
       comment: cafeComment.value
     }, {
       headers: {
-        'Authorization': `Bearer ${userStore.token}`
+        'Authorization': `Token ${userStore.token}`
       }
     });
     
