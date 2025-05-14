@@ -84,17 +84,14 @@ const login = async () => {
   
   isLoading.value = true
   
-  try {
-    // Send request to backend with the correct URL
+   try {
+    // 1. Send login request
     const response = await axios.post('http://127.0.0.1:8000/accounts/login/', {
       username: username.value,
       password: password.value,
     })
     
-    console.log('Login successful:', response.data)
-    successMessage.value = 'Login successful! Redirecting...'
-    
-    // Extract token from response
+    // 2. Extract token
     let token = null
     if (response.data.token) {
       token = response.data.token
@@ -105,37 +102,31 @@ const login = async () => {
     }
     
     if (!token) {
-      console.error('No token found in response:', response.data)
-      errorMessage.value = 'Login successful but no authentication token received.'
-      isLoading.value = false
-      return
+      throw new Error('No authentication token received')
     }
     
-    // Store token in user store
+    // 3. Store token
     userStore.setToken(token)
-    successMessage.value = 'Login successful!'
     
-    try {
-      // Fetch user profile data
-      await userStore.fetchUserProfile()
-      console.log('User profile fetched successfully')
-      
-      setTimeout(() => {
-        // Redirect to homepage first
-        router.push('/home')
-      }, 300)
-      
-    } catch (profileError) {
-      console.error('Error fetching user profile:', profileError)
-      // If profile fetch fails, show error but don't redirect
-      errorMessage.value = 'Error loading user profile. Please try again.'
-      // Clear the token since we couldn't complete the login process
-      userStore.setToken(null)
-    }
+    // 4. Fetch user profile
+    await userStore.fetchUserProfile()
+    console.log('User profile fetched successfully')
+    
+    // 5. Only show success and redirect if everything worked
+    successMessage.value = 'Login successful! Redirecting...'
+    
+    // 6. Redirect after short delay
+    setTimeout(() => {
+      router.push('/home')
+    }, 1000)
     
   } catch (error) {
     console.error('Login error:', error)
     
+    // Clear token if we got one but failed later
+    userStore.setToken(null)
+    
+    // Handle different error cases
     if (error.response && error.response.data) {
       if (typeof error.response.data === 'object') {
         if (error.response.data.non_field_errors) {
@@ -150,6 +141,8 @@ const login = async () => {
       } else {
         errorMessage.value = error.response.data || 'Login failed. Please try again.'
       }
+    } else if (error.message === 'No authentication token received') {
+      errorMessage.value = error.message
     } else {
       errorMessage.value = 'Network error. Please try again later.'
     }

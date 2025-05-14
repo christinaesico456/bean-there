@@ -24,7 +24,15 @@ export const useUserStore = defineStore('user', () => {
 
   // Set user data
   const setUser = (userData) => {
-    user.value = userData
+    user.value = {
+      firstName: userData.first_name || '',
+      lastName: userData.last_name || '',
+      email: userData.email || '',
+      phone: userData.phone_number || '',
+      bio: userData.bio || '',
+      profilePicture: userData.profile_picture || '',
+      username: userData.username || ''
+    }
   }
 
   // Set authentication token
@@ -48,26 +56,42 @@ export const useUserStore = defineStore('user', () => {
     isLoading.value = true
     error.value = ''
 
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
-        headers: {
-          'Authorization': `Bearer ${token.value}`
+     try {
+      let response;
+      try {
+        response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
+          headers: {
+            'Authorization': `Bearer ${token.value}`
+          }
+        });
+      } catch (firstAttemptError) {
+        try {
+          response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
+            headers: {
+              'Authorization': `Token ${token.value}`
+            }
+          });
+        } catch (secondAttemptError) {
+          response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
+            headers: {
+              'Authorization': token.value
+            }
+          });
         }
-      })
+      }
 
-      // Update user data with response
       setUser(response.data)
       isLoading.value = false
+      return response.data
     } catch (err) {
       console.error('Error fetching user profile:', err)
       error.value = err.response?.data?.error || 'Failed to load profile data'
       isLoading.value = false
-      
-      // If we get a 401 Unauthorized error, the token is invalid
+
       if (err.response && err.response.status === 401) {
         logout()
       }
-      throw err
+      return Promise.reject(err)
     }
   }
 

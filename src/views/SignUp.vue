@@ -91,8 +91,7 @@ const handleSubmit = async () => {
     const lastName = nameParts.slice(1).join(' ') || ''
 
     const response = await axios.post('http://127.0.0.1:8000/accounts/register/', {
-      first_name: firstName,
-      last_name: lastName,
+      full_name: fullName.value,  
       email: email.value,
       username: username.value,
       phone_number: phone.value,
