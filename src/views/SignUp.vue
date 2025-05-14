@@ -56,11 +56,16 @@ import { useUserStore } from '@/stores/user'
 const router = useRouter()
 const userStore = useUserStore()
 
+const API_URL = 'http://127.0.0.1:8000/accounts/register/'
+
 // Form fields
 const fullName = ref('')
 const email = ref('')
 const username = ref('')
 const phone = ref('')
+const street = ref('')
+const barangay = ref('')
+const bio = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const errorMessage = ref('')
@@ -73,8 +78,8 @@ const handleSubmit = async () => {
   successMessage.value = ''
 
   // Form validation
-  if (!fullName.value || !email.value || !username.value || !phone.value || !password.value || !confirmPassword.value) {
-    errorMessage.value = 'All fields are required.'
+  if (!fullName.value || !email.value || !username.value || !password.value || !confirmPassword.value) {
+    errorMessage.value = 'Name, email, username, and password are required.'
     return
   }
 
@@ -83,22 +88,21 @@ const handleSubmit = async () => {
     return
   }
 
- isSubmitting.value = true 
+  isSubmitting.value = true 
 
   try {
-    const nameParts = fullName.value.trim().split(' ')
-    const firstName = nameParts[0] || ''
-    const lastName = nameParts.slice(1).join(' ') || ''
-
+    // Request body structured according to your backend serializer expectations
     const response = await axios.post('http://127.0.0.1:8000/accounts/register/', {
-      full_name: fullName.value,  
+      full_name: fullName.value,
       email: email.value,
       username: username.value,
       phone_number: phone.value,
+      street: street.value,
+      barangay: barangay.value,
+      bio: bio.value,
       password: password.value,
       confirm_password: confirmPassword.value
     }, {
-      // Add proper headers
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -113,21 +117,34 @@ const handleSubmit = async () => {
       router.push('/login')
     }, 2000)
 
-    } catch (error) {
+  } catch (error) {
     console.error('Registration error:', error)
-    
     
     if (error.response) {
       if (error.response.data) {
         const data = error.response.data
-        if (data.email) {
+        
+        // Handle detailed validation errors
+        if (data.details && typeof data.details === 'object') {
+          // Find the first error message
+          for (const field in data.details) {
+            errorMessage.value = `${field}: ${data.details[field][0]}`
+            break
+          }
+        } else if (data.email) {
           errorMessage.value = `Email: ${data.email[0]}`
         } else if (data.username) {
           errorMessage.value = `Username: ${data.username[0]}`
+        } else if (data.password) {
+          errorMessage.value = `Password: ${data.password[0]}`
+        } else if (data.phone_number) {
+          errorMessage.value = `Phone number: ${data.phone_number[0]}`
         } else if (data.non_field_errors) {
           errorMessage.value = data.non_field_errors[0]
         } else if (data.detail) {
           errorMessage.value = data.detail
+        } else if (data.error) {
+          errorMessage.value = data.error
         } else {
           errorMessage.value = 'Registration failed. Please check your information.'
         }

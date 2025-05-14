@@ -57,28 +57,11 @@ export const useUserStore = defineStore('user', () => {
     error.value = ''
 
      try {
-      let response;
-      try {
-        response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
-          headers: {
-            'Authorization': `Bearer ${token.value}`
-          }
-        });
-      } catch (firstAttemptError) {
-        try {
-          response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
-            headers: {
-              'Authorization': `Token ${token.value}`
-            }
-          });
-        } catch (secondAttemptError) {
-          response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
-            headers: {
-              'Authorization': token.value
-            }
-          });
+      const response = await axios.get('http://127.0.0.1:8000/accounts/profile/', {
+        headers: {
+          'Authorization': `Token ${token.value}`
         }
-      }
+      });
 
       setUser(response.data)
       isLoading.value = false
@@ -96,7 +79,19 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // Logout function
-  const logout = () => {
+  const logout = async () => {
+    if (token.value) {
+      try {
+        await axios.post('http://127.0.0.1:8000/accounts/logout/', {}, {
+          headers: {
+            'Authorization': `Token ${token.value}`
+          }
+        });
+      } catch (err) {
+        console.error('Error during logout:', err);
+      }
+    }
+    
     token.value = ''
     localStorage.removeItem('token')
     user.value = {

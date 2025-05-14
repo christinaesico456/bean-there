@@ -78,46 +78,43 @@ const login = async () => {
   
   // Form validation
   if (!username.value || !password.value) {
-    errorMessage.value = 'Please enter both username and password.'
+    errorMessage.value = 'Please enter both username/email and password.'
     return
   }
   
   isLoading.value = true
   
-   try {
-    // 1. Send login request
+  try {
+    // Send login request
     const response = await axios.post('http://127.0.0.1:8000/accounts/login/', {
       username: username.value,
       password: password.value,
     })
     
-    // 2. Extract token
-    let token = null
-    if (response.data.token) {
-      token = response.data.token
-    } else if (response.data.access) {
-      token = response.data.access
-    } else if (response.data.key) {
-      token = response.data.key
-    }
+    // Extract token (focusing on the token structure we know our backend uses)
+    const token = response.data.token
     
     if (!token) {
       throw new Error('No authentication token received')
     }
     
-    // 3. Store token
+    // Store token
     userStore.setToken(token)
     
-    // 4. Fetch user profile
+    // Fetch user profile
     await userStore.fetchUserProfile()
     console.log('User profile fetched successfully')
     
-    // 5. Only show success and redirect if everything worked
+    // Only show success and redirect if everything worked
     successMessage.value = 'Login successful! Redirecting...'
     
-    // 6. Redirect after short delay
+    // Redirect after short delay
     setTimeout(() => {
-      router.push('/home')
+      if (route.query.redirect) {
+        router.push(route.query.redirect.toString())
+      } else {
+        router.push('/home')
+      }
     }, 1000)
     
   } catch (error) {
