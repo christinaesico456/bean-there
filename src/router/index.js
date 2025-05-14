@@ -3,6 +3,7 @@ import HomePage from "@/views/HomePage.vue";
 import UserProfile from "../views/UserProfile.vue";
 import SearchResults from "../views/SearchResults.vue";
 import SignUp from '..SignUp.vue';
+import { User } from "lucide-vue-next";
 
 
 
@@ -14,8 +15,8 @@ const routes = [
   },
   {
     path: "/profile",
-    name: "userProfile",
-    component: UserProfile,
+    name: "UserProfile",
+    component: () => UserProfile,
   },
   {
     path: "/search",

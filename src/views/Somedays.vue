@@ -170,11 +170,8 @@ const offerings = [
           <a href="#menu" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">Menu</a>
           <a href="#about" class="text-[#003366] hover:text-[#9accff] font-semibold transition duration-300">About</a>
         </div>
+      </div>
 
-    <!-- Search Bar -->
-        <div class="relative">
-          <input type="text" placeholder="Search" class="px-4 py-2 text-sm border rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]"></div>
-        </div>
         </nav>
 
     <!-- Header -->

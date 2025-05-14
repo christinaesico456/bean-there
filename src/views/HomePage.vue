@@ -158,6 +158,7 @@ const submitFeedback = async () => {
 
 
 const handleProfileClick = () => {
+  console.log('User token:', userStore.token); // Debug log
   if (userStore.token) {
     // User is logged in, redirect to profile
     router.push({ name: 'UserProfile' });
