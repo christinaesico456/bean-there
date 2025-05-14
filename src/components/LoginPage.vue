@@ -92,8 +92,8 @@ const login = async () => {
     })
     
     // Extract token (focusing on the token structure we know our backend uses)
-    const token = response.data.token
-    
+    const token = response.data.token || response.data.access
+
     if (!token) {
       throw new Error('No authentication token received')
     }
@@ -124,19 +124,16 @@ const login = async () => {
     userStore.setToken(null)
     
     // Handle different error cases
-    if (error.response && error.response.data) {
-      if (typeof error.response.data === 'object') {
-        if (error.response.data.non_field_errors) {
-          errorMessage.value = error.response.data.non_field_errors[0]
-        } else if (error.response.data.detail) {
-          errorMessage.value = error.response.data.detail
-        } else if (error.response.data.error) {
-          errorMessage.value = error.response.data.error
-        } else {
-          errorMessage.value = 'Invalid credentials. Please try again.'
-        }
+      if (error.response && error.response.data) {
+      const data = error.response.data
+      if (typeof data === 'object') {
+        errorMessage.value = 
+          data.non_field_errors?.[0] ||
+          data.detail ||
+          data.error ||
+          'Invalid credentials. Please try again.'
       } else {
-        errorMessage.value = error.response.data || 'Login failed. Please try again.'
+        errorMessage.value = data || 'Login failed. Please try again.'
       }
     } else if (error.message === 'No authentication token received') {
       errorMessage.value = error.message
