@@ -16,7 +16,7 @@ const routes = [
   {
     path: "/profile",
     name: "UserProfile",
-    component: () => UserProfile,
+    component: UserProfile,
   },
   {
     path: "/search",

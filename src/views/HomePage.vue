@@ -159,9 +159,11 @@ const submitFeedback = async () => {
 
 const handleProfileClick = () => {
   console.log('User token:', userStore.token); // Debug log
+  // Log all route names known by router
+  console.log('All route names:', router.getRoutes().map(r => r.name));
   if (userStore.token) {
     // User is logged in, redirect to profile
-    router.push({ name: 'UserProfile' });
+    router.push({ name: 'userProfile' });
   } else {
     // User is not logged in, show message and redirect after delay
     showLoginMessage.value = true;
