@@ -215,6 +215,7 @@ const retryFetch = async () => {
 }
 
 const logout = () => {
+  console.log('userStore.logout() called')
   userStore.logout();
   router.push('/login');
 }
