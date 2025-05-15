@@ -28,7 +28,11 @@ onMounted(() => {
 });
 
 const isHeartClicked = ref(false);
-const CAFE_ID = 1; 
+const cafe = ref({
+  id: 1,
+  name: "Tinatangi Café",
+  image: "/store.jpg"  
+});
 
 const checkFavoriteStatus = async () => {
   try {
@@ -40,7 +44,7 @@ const checkFavoriteStatus = async () => {
     
     // Check if this cafe is in the user's favorites
     const favorites = response.data;
-    isHeartClicked.value = favorites.some(favorite => favorite.cafe.id === CAFE_ID);
+    isHeartClicked.value = favorites.some(favorite => favorite.cafe.id === cafe.value.id);
   } catch (error) {
     console.error('Error checking favorite status:', error);
   }
@@ -48,9 +52,14 @@ const checkFavoriteStatus = async () => {
 
 // Toggle favorite status
 const toggleHeart = async () => {
+  if (!localStorage.getItem('token')) {
+    alert('Please log in to add this cafe to your favorites');
+    return;
+  }
+  
   try {
     // Call the toggle endpoint
-    await axios.post(`http://127.0.0.1:8000/favorite/toggle/${CAFE_ID}/`, {}, {
+    await axios.post(`http://127.0.0.1:8000/favorite/toggle/${cafe.value.id}/`, {}, {
       headers: {
         Authorization: `Token ${localStorage.getItem('token')}`,
       },
@@ -60,8 +69,7 @@ const toggleHeart = async () => {
     isHeartClicked.value = !isHeartClicked.value;
   } catch (error) {
     console.error('Error toggling favorite:', error);
-    // Show error message to user
-    alert('Please log in to add this cafe to your favorites');
+    alert('An error occurred. Please try again.');
   }
 };
 
@@ -158,8 +166,13 @@ const fetchReviews = async () => {
 };
 
 onMounted(() => {
+  const header = document.querySelector('header');
+  if (header) {
+    header.scrollIntoView({ behavior: 'smooth' });
+  }
   checkFavoriteStatus();
-})
+  fetchReviews();
+});
 
 </script>
 
