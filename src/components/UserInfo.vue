@@ -49,45 +49,30 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <label class="block mb-2 text-gray-700">First Name</label>
-            <span class="block w-full p-3 bg-gray-100 border rounded">{{ user.firstName || 'Not provided' }}</span>
+            <span class="block w-full p-3 truncate bg-gray-100 border rounded">{{ user.firstName || 'Not provided' }}</span>
           </div>
           <div>
             <label class="block mb-2 text-gray-700">Last Name</label>
-            <span class="block w-full p-3 bg-gray-100 border rounded">{{ user.lastName || 'Not provided' }}</span>
+            <span class="block w-full p-3 truncate bg-gray-100 border rounded">{{ user.lastName || 'Not provided' }}</span>
           </div>
           <div>
             <label class="block mb-2 text-gray-700">Email</label>
-            <span class="block w-full p-3 bg-gray-100 border rounded">{{ user.email || 'Not provided' }}</span>
+            <span class="block w-full p-3 truncate bg-gray-100 border rounded">{{ user.email || 'Not provided' }}</span>
           </div>
           <div>
             <label class="block mb-2 text-gray-700">Phone Number</label>
-            <span class="block w-full p-3 bg-gray-100 border rounded">{{ user.phone || 'Not provided' }}</span>
+            <span class="block w-full p-3 truncate bg-gray-100 border rounded">{{ user.phone || 'Not provided' }}</span>
           </div>
         </div>
 
         <div class="mt-6">
           <label class="block mb-2 text-gray-700">Bio</label>
-          <span class="block w-full p-3 bg-gray-100 border rounded min-h-[100px]">
+          <span class="block w-full p-3 bg-gray-100 border rounded min-h-[100px] overflow-auto">
             {{ user.bio || 'No bio provided yet.' }}
           </span>
         </div>
-        
-        <div class="flex justify-center gap-4 mt-8">
-          <router-link 
-            to="/settings" 
-            class="px-6 py-2 text-white bg-[#4A2C2A] rounded hover:bg-[#603A36]"
-          >
-            Edit Profile
-          </router-link>
-          <button 
-            @click="logout" 
-            class="px-6 py-2 text-gray-800 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Sign Out
-          </button>
         </div>
       </div>
-    </div>
 </template>
 
 <script setup>
@@ -102,6 +87,7 @@ const userStore = useUserStore()
 const isLoading = ref(false)
 const error = ref('')
 const user = ref({})
+const fileInput = ref(null)
 
 // Get user initials for avatar fallback
 const userInitials = computed(() => {
@@ -109,6 +95,11 @@ const userInitials = computed(() => {
   const last = user.value.lastName ? user.value.lastName.charAt(0).toUpperCase() : '';
   return first + last;
 })
+
+// Trigger file input click
+const triggerFileInput = () => {
+  fileInput.value.click();
+}
 
 // Watch for changes in the store's user object
 watch(() => userStore.user, (newUserData) => {

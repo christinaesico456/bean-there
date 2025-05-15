@@ -30,7 +30,7 @@ const checkFavoriteStatus = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:8000/favorite/user/', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Token ${localStorage.getItem('token')}`,
       },
     });
     
@@ -48,7 +48,7 @@ const toggleHeart = async () => {
     // Call the toggle endpoint
     await axios.post(`http://127.0.0.1:8000/favorite/toggle/${CAFE_ID}/`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Token ${localStorage.getItem('token')}`,
       },
     });
     
@@ -91,7 +91,7 @@ const submitFeedback = async () => {
   try {
     // Create the feedback object
     const feedbackData = {
-      cafe: "Tinatangi Café", // Hardcoded for this specific café
+      cafe: "Somedays Brew", // Hardcoded for this specific café
       rating: rating.value,
       comment: feedbackText.value,
       // Include user info if available from userStore

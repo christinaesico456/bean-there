@@ -86,7 +86,7 @@ const getUserProfile = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:8000/api/user/profile/', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`, 
+        Authorization: `Token ${localStorage.getItem('token')}`, 
       },
     })
     user.value.name = response.data.name
@@ -101,7 +101,7 @@ const getFavorites = async () => {
     loading.value = true
     const response = await axios.get('http://127.0.0.1:8000/favorite/user/', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Token ${localStorage.getItem('token')}`,
       },
     })
     
@@ -125,7 +125,7 @@ const toggleFavorite = async (cafeId) => {
   try {
     await axios.post(`http://127.0.0.1:8000/favorite/toggle/${cafeId}/`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Token ${localStorage.getItem('token')}`,
       },
     })
     
