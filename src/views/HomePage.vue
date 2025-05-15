@@ -93,7 +93,6 @@ const goToLogin = () => {
   if (userStore.isLoggedIn) {
     // Show the feedback form instead of redirecting
     showFeedbackForm.value = true;
-    showFeedbackForm.value = true;
     
     // Smooth scroll to the feedback form section
     setTimeout(() => {
@@ -165,7 +164,7 @@ const handleProfileClick = () => {
     // User is logged in, redirect to profile
     router.push({ name: 'userProfile' });
   } else {
-    // User is not logged in, show message and redirect after delay
+    // User is not logged in
     showLoginMessage.value = true;
     setTimeout(() => {
       showLoginMessage.value = false;
@@ -358,12 +357,68 @@ function formatDate(dateString) {
       </div>
     </div>
     
-    <!-- Button to Write Feedback for logged-in users -->
-    <div v-if="!userStore.token" class="flex justify-center mt-10">
+    <!-- Button to Write Feedback - show for all users -->
+    <div class="flex justify-center mt-10">
       <button @click="goToLogin"
         class="px-10 py-5 bg-[#E3B897] text-white rounded-full text-lg font-semibold hover:bg-[#C69575] transition duration-300">
         Get Started
       </button>
+    </div>
+
+    <!-- Feedback Form (shows only when logged in and button is clicked) -->
+    <div v-if="showFeedbackForm" id="feedback-form" class="p-6 mt-12 bg-white rounded-lg shadow-lg">
+      <h3 class="mb-6 text-2xl font-bold text-center">Share Your Experience</h3>
+      
+      <div v-if="feedbackSuccess" class="p-3 mb-4 text-green-700 bg-green-100 rounded">
+        Thank you for your feedback! Your review has been submitted successfully.
+      </div>
+      
+      <div v-if="feedbackFormError" class="p-3 mb-4 text-red-700 bg-red-100 rounded">
+        {{ feedbackFormError }}
+      </div>
+      
+      <form @submit.prevent="submitFeedback" class="space-y-4">
+        <div>
+          <label class="block mb-2 text-sm font-medium">Select Café</label>
+          <select v-model="selectedCafe" class="w-full p-2 border rounded focus:ring focus:ring-[#A67C52]">
+            <option :value="null">-- Select a café --</option>
+            <option v-for="cafe in cafes" :key="cafe.id" :value="cafe.id">{{ cafe.name }}</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block mb-2 text-sm font-medium">Rating</label>
+          <div class="flex items-center">
+            <template v-for="i in 5" :key="i">
+              <span 
+                @click="cafeRating = i" 
+                class="text-2xl cursor-pointer"
+                :class="i <= cafeRating ? 'text-yellow-500' : 'text-gray-300'"
+              >★</span>
+            </template>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block mb-2 text-sm font-medium">Your Feedback</label>
+          <textarea 
+            v-model="cafeComment" 
+            rows="4" 
+            class="w-full p-2 border rounded focus:ring focus:ring-[#A67C52]"
+            placeholder="Share your experience..."
+          ></textarea>
+        </div>
+        
+        <div>
+          <button 
+            type="submit" 
+            class="w-full px-6 py-3 bg-[#5B3926] text-white rounded hover:bg-[#A67C52] disabled:bg-gray-400"
+            :disabled="submittingFeedback"
+          >
+            {{ submittingFeedback ? 'Submitting...' : 'Submit Feedback' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </section>
@@ -395,3 +450,4 @@ function formatDate(dateString) {
   animation: float 3s ease-in-out infinite;
 }
 </style>
+

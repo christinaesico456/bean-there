@@ -20,18 +20,29 @@
     <div v-else class="w-full">
       <!-- Profile Header -->
       <div class="flex flex-col items-center w-full max-w-3xl mx-auto mb-10">
-        <div class="w-24 h-24 mb-4 overflow-hidden bg-gray-300 rounded-full">
+        <div class="relative w-24 h-24 mb-4 overflow-hidden bg-gray-300 rounded-full group">
           <img v-if="user.profilePicture" :src="user.profilePicture" alt="Profile Picture" class="object-cover w-full h-full" />
           <div v-else class="flex items-center justify-center w-full h-full bg-[#A37550] text-white text-2xl font-bold">
-            {{ userInitials }}
-          </div>
+          {{ userInitials }}
         </div>
+  
+    <!-- Overlay with edit icon -->
+    <div class="absolute inset-0 flex items-center justify-center transition-opacity bg-black bg-opacity-50 opacity-0 cursor-pointer group-hover:opacity-100" @click="triggerFileInput">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+   </div>
+  
+    <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" class="hidden" />
+    </div>
+  </div>
 
-        <div class="text-center">
-          <h2 class="text-3xl font-bold text-[#3A1C1A]">{{ user.firstName }} {{ user.lastName }}</h2>
-          <p class="text-gray-600">@{{ user.username }}</p>
-        </div>
+      <div class="text-center">
+        <h2 class="text-3xl font-bold text-[#3A1C1A]">{{ user.firstName }} {{ user.lastName }}</h2>
+        <p class="text-gray-600">@{{ user.username }}</p>
       </div>
+    </div>
 
       <!-- Profile Display Section -->
       <div class="w-full max-w-3xl mx-auto">
@@ -77,7 +88,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -131,6 +141,64 @@ onMounted(async () => {
     }
   }
 })
+
+//User profile picture upload
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  isLoading.value = true;
+  
+  try {
+    const reader = new FileReader();
+    
+    reader.onload = async (e) => {
+      const imageData = e.target.result;
+      
+      // Send the profile picture directly to the backend
+      try {
+        const response = await fetch('http://127.0.0.1:8000/accounts/profile/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${userStore.token}`  
+          },
+          body: JSON.stringify({
+            profile_picture: imageData,
+            bio: user.value.bio
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update profile picture');
+        }
+        
+        const responseData = await response.json();
+        
+        // Update the local state and store with the URL returned from the server
+        user.value.profilePicture = responseData.data.profile_picture;
+        userStore.setUser({
+          ...userStore.user,
+          profilePicture: responseData.data.profile_picture
+        });
+        
+        // Show success message
+        error.value = '';
+        
+      } catch (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        error.value = 'Failed to upload profile picture';
+      }
+    };
+    
+    reader.readAsDataURL(file);
+    
+  } catch (err) {
+    error.value = 'Failed to process profile picture';
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const retryFetch = async () => {
   isLoading.value = true

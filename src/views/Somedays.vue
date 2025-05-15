@@ -104,28 +104,21 @@ const submitFeedback = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Include authorization token if user is logged in
-        ...(userStore.token && { 'Authorization': `Bearer ${userStore.token}` })
+        ...(userStore.token && { 'Authorization': `Token ${userStore.token}` }),
       },
-      body: JSON.stringify(feedbackData)
+      body: JSON.stringify(feedbackData),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to submit feedback');
     }
-    
-    // Success message
+
     feedbackSuccess.value = 'Thank you for your feedback!';
-    
-    // Reset form
     rating.value = 0;
     feedbackText.value = '';
-    
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      feedbackSuccess.value = '';
-    }, 3000);
-    
+
+    // Re-fetch reviews to update the list
+    fetchReviews();
   } catch (error) {
     console.error('Error submitting feedback:', error);
     feedbackError.value = 'Failed to submit feedback. Please try again later.';
@@ -144,6 +137,25 @@ const offerings = [
   '🛵 Delivery (Food Panda)',
   '🚗 Parking'
 ];
+
+const reviews = ref([]);
+
+const fetchReviews = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/reviews/');
+    if (!response.ok) {
+      throw new Error('Failed to fetch reviews');
+    }
+    reviews.value = await response.json();
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+  }
+};
+
+// Fetch reviews on component mount
+onMounted(() => {
+  fetchReviews();
+});
 </script>
 
 <template>
