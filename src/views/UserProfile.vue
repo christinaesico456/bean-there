@@ -58,14 +58,12 @@ const router = useRouter();
 // Get user store
 const userStore = useUserStore();
 
-const logout = () => {
-  console.log('Logging out...');
-  // Clear authentication state
-  userStore.clearUser(); 
-  localStorage.removeItem('authToken'); 
-  
-  router.push("/"); // Redirect to homepage
-};
+const logout = async () => {
+  console.log('Logging out...')
+  await userStore.logout()
+  router.push('/login')
+}
+
 
 const tabClass = (tab) => {
   return [
