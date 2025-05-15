@@ -4,6 +4,7 @@ import UserProfile from "../views/UserProfile.vue";
 import SearchResults from "../views/SearchResults.vue";
 import SignUp from '..SignUp.vue';
 import { User } from "lucide-vue-next";
+import SettingsPage from "../views/SettingsPage.vue"; // Import your SettingsPage component
 
 
 

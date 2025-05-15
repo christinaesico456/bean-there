@@ -6,140 +6,154 @@ import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '@/stores/user';
 import axios from 'axios';
+import { useUserStore } from '@/stores/user';
 
-// Gallery images
-const images = [
-  "/img4.jpg",
-  "/img2.jpg",
-  "/img8.jpg",
-  "/img3.jpg",
-  "/store.jpg",
-];
 const router = useRouter();
 const userStore = useUserStore();
+const CAFE_ID = 1; // This should be dynamic if possible
 
+const images = [
+  "/g1.jpg",
+  "/g2.jpg",
+  "/g3.jpg",
+];
+
+// Scroll to header on mount
 onMounted(() => {
   const header = document.querySelector('header');
   if (header) {
     header.scrollIntoView({ behavior: 'smooth' });
   }
+  fetchReviews();
+  checkFavoriteStatus();
 });
 
+
+defineProps({
+  cafe: {
+    type: Object,
+    required: true
+  }
+})
+
+// Heart (favorite) logic
 const isHeartClicked = ref(false);
-const cafe = ref({
-  id: 1,
-  name: "Tinatangi Café",
-  image: "/store.jpg"  
-});
 
+// Utility: safely extract favorites
 const checkFavoriteStatus = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:8000/favorite/user/', {
       headers: {
-        Authorization: `Token ${localStorage.getItem('token')}`,
+        Authorization: `Token ${userStore.token}`,
       },
     });
-    
-    // Check if this cafe is in the user's favorites
-    const favorites = response.data;
-    isHeartClicked.value = favorites.some(favorite => favorite.cafe.id === cafe.value.id);
+
+    const favorites = Array.isArray(response.data) ? response.data : [];
+
+    isHeartClicked.value = favorites.some(fav => {
+      const cafe = fav.cafe || fav;  // fallback if structure is just the cafe
+      return cafe.id === CAFE_ID;
+    });
+
   } catch (error) {
     console.error('Error checking favorite status:', error);
   }
 };
 
-// Toggle favorite status
 const toggleHeart = async () => {
-  if (!localStorage.getItem('token')) {
-    alert('Please log in to add this cafe to your favorites');
-    return;
-  }
-  
   try {
-    // Call the toggle endpoint
-    await axios.post(`http://127.0.0.1:8000/favorite/toggle/${cafe.value.id}/`, {}, {
+    await axios.post(`http://127.0.0.1:8000/favorite/toggle/${CAFE_ID}/`, {}, {
       headers: {
-        Authorization: `Token ${localStorage.getItem('token')}`,
+        Authorization: `Token ${userStore.token}`,
       },
     });
-    
-    // Toggle the heart state locally
+
     isHeartClicked.value = !isHeartClicked.value;
+
+    // ✅ Dispatch event so Favorites.vue refreshes
+    const event = new Event('favoriteChanged');
+    window.dispatchEvent(event);
+
   } catch (error) {
     console.error('Error toggling favorite:', error);
-    alert('An error occurred. Please try again.');
+    alert('Please log in to add this cafe to your favorites');
   }
 };
 
+
+// Review form state
 const rating = ref(0);
 const feedbackText = ref('');
 const isSubmitting = ref(false);
 const feedbackError = ref('');
 const feedbackSuccess = ref('');
+const reviews = ref([]);
 
+// Set selected rating
 const setRating = (star) => {
   rating.value = star;
 };
 
-// Function to submit feedback
+// Submit review
 const submitFeedback = async () => {
-  // Validate form
   if (rating.value === 0) {
     feedbackError.value = 'Please select a rating';
     return;
   }
-  
   if (!feedbackText.value.trim()) {
     feedbackError.value = 'Please enter your feedback';
     return;
   }
-  
-  // Reset error message
+
   feedbackError.value = '';
   isSubmitting.value = true;
-  
+
   try {
-    // Create the feedback object
-    const feedbackData = {
-      cafe: "Tinatangi Café", // Hardcoded for this specific café
-      rating: rating.value,
+    const reviewData = {
+      cafe: CAFE_ID,           // Must be integer ID
+      rating: rating.value,    // integer 1 to 5
       comment: feedbackText.value,
-      // Include user info if available from userStore
-      user_id: userStore.userId || null,
-      user_name: userStore.username || null
     };
-    
-    // Make API call to save the feedback
-    const response = await fetch('http://127.0.0.1:8000/reviews/', {
-      method: 'POST',
+
+    const response = await axios.post('http://127.0.0.1:8000/reviews/', reviewData, {
       headers: {
         'Content-Type': 'application/json',
-        // Include authorization token if user is logged in
-        ...(userStore.token && { 'Authorization': `Token ${userStore.token}` })
+        Authorization: `Token ${userStore.token}`,  // Auth token
       },
-      body: JSON.stringify(feedbackData)
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to submit feedback');
-    }
-    
-    // Success message
+
     feedbackSuccess.value = 'Thank you for your feedback!';
     rating.value = 0;
     feedbackText.value = '';
-    
     fetchReviews();
+
   } catch (error) {
-    console.error('Error submitting feedback:', error);
-    feedbackError.value = 'Failed to submit feedback. Please try again later.';
+    console.error('Error submitting review:', error);
+    if (error.response && error.response.data) {
+      console.error('Backend validation error:', error.response.data);
+      // Show detailed backend error message if available
+      feedbackError.value = Object.values(error.response.data).flat().join(' ');
+    } else {
+      feedbackError.value = 'Failed to submit feedback. Please try again later.';
+    }
   } finally {
     isSubmitting.value = false;
   }
 };
 
+
+// Fetch reviews by cafe
+const fetchReviews = async () => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:8000/reviews/?cafe=${CAFE_ID}`);
+    reviews.value = response.data;
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+  }
+};
+
+// Cafe offerings
 const offerings = [
   '☕ Dine-in',
   '🌿 Outdoor Seating',
@@ -150,30 +164,6 @@ const offerings = [
   '🛵 Delivery (Food Panda)',
   '🚗 Parking'
 ];
-
-const reviews = ref([]);
-
-const fetchReviews = async () => {
-  try {
-    const response = await fetch('http://127.0.0.1:8000/reviews/');
-    if (!response.ok) {
-      throw new Error('Failed to fetch reviews');
-    }
-    reviews.value = await response.json();
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
-  }
-};
-
-onMounted(() => {
-  const header = document.querySelector('header');
-  if (header) {
-    header.scrollIntoView({ behavior: 'smooth' });
-  }
-  checkFavoriteStatus();
-  fetchReviews();
-});
-
 </script>
 
 
