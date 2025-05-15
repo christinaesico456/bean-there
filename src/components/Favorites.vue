@@ -103,13 +103,25 @@ const getFavorites = async () => {
     // Defensive: make sure it's an array
     if (Array.isArray(response.data)) {
       favoriteCafes.value = response.data.map(item => {
-        const cafe = item.cafe
-        return {
-          id: cafe.id,
-          name: cafe.name,
-          image: cafe.image,
+        // Check if cafe exists in the response and has required properties
+        if (item.cafe && item.cafe.id && item.cafe.name) {
+          return {
+            id: item.cafe.id,
+            name: item.cafe.name,
+            image: item.cafe.image || '/placeholder-cafe.jpg',
+          }
+        } else if (item.id && item.name) {
+          // Direct cafe object without nesting
+          return {
+            id: item.id,
+            name: item.name,
+            image: item.image || '/placeholder-cafe.jpg',
+          }
+        } else {
+          console.warn('Skipping invalid cafe item:', item)
+          return null
         }
-      })
+      }).filter(cafe => cafe !== null) // Remove any null entries
     } else {
       console.error('Unexpected response:', response.data)
       favoriteCafes.value = []

@@ -45,6 +45,7 @@ import { useRouter } from "vue-router";
 import UserInfo from "@/components/UserInfo.vue";
 import Favorites from "@/components/Favorites.vue";
 import Settings from "@/components/Settings.vue";
+import { useUserStore } from "@/stores/user"; 
 
 // Icons
 import { UserIcon, HeartIcon, SettingsIcon, LogOutIcon as LogoutIcon } from "lucide-vue-next";
@@ -54,11 +55,16 @@ const activeTab = ref("info");
 
 // Router for logout
 const router = useRouter();
+// Get user store
+const userStore = useUserStore();
 
 const logout = () => {
-  console.log('userStore.logout() called');
-  // Optional: clear auth token, user store, etc.
-  router.push("/login");
+  console.log('Logging out...');
+  // Clear authentication state
+  userStore.clearUser(); 
+  localStorage.removeItem('authToken'); 
+  
+  router.push("/"); // Redirect to homepage
 };
 
 const tabClass = (tab) => {

@@ -15,14 +15,30 @@ export const useCafeStore = defineStore('cafe', () => {
           Authorization: `Token ${localStorage.getItem('token')}`,
         },
       })
+       console.log('API Response in store:', response.data)
       
-      favoriteCafes.value = response.data.map(item => {
-        return {
-          id: item.cafe?.id || item.id,
-          name: item.cafe?.name || item.name,
-          image: item.cafe?.image || item.image
-        }
-      })
+      // Handle the array correctly
+      if (Array.isArray(response.data)) {
+        favoriteCafes.value = response.data.map(item => {
+          // Handle both direct cafe objects and nested cafe objects
+          if (item.cafe) {
+            return {
+              id: item.cafe.id,
+              name: item.cafe.name,
+              image: item.cafe.image || '/placeholder-cafe.jpg'
+            }
+          } else {
+            return {
+              id: item.id,
+              name: item.name,
+              image: item.image || '/placeholder-cafe.jpg'
+            }
+          }
+        })
+      } else {
+        console.error('Unexpected response format:', response.data)
+        favoriteCafes.value = []
+      }
       
       return favoriteCafes.value
     } catch (error) {
@@ -54,9 +70,15 @@ export const useCafeStore = defineStore('cafe', () => {
         },
       })
       
-      // Check if the cafe is now favorited
-      const isFavorited = await isCafeFavorited(cafeId)
+      console.log('Toggle response:', response.data)
       
+      // Update our local state after toggling
+      await fetchFavorites()
+      
+      // Check if the cafe is now favorited
+      const isFavorited = favoriteCafes.value.some(cafe => cafe.id === cafeId)
+      
+      // Notify other components about the change
       window.dispatchEvent(new CustomEvent('favoriteChanged', { 
         detail: { cafeId, isFavorited } 
       }))
@@ -64,7 +86,6 @@ export const useCafeStore = defineStore('cafe', () => {
       return isFavorited
     } catch (error) {
       console.error('Error toggling favorite status:', error)
-     
       throw error
     }
   }
