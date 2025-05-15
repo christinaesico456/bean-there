@@ -71,8 +71,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch} from 'vue'
 import axios from 'axios'
+import { useRoute } from 'vue-router'
 
 const user = ref({
   name: '',
@@ -80,6 +81,7 @@ const user = ref({
 
 const favoriteCafes = ref([])
 const loading = ref(true)
+const route = useRoute()
 
 // Fetch user details (name)
 const getUserProfile = async () => {
@@ -107,10 +109,19 @@ const getFavorites = async () => {
     
     // Assuming the response is an array of favorite objects that contain cafe details
     favoriteCafes.value = response.data.map(item => {
-      return {
-        id: item.cafe.id,
-        name: item.cafe.name,
-        image: item.cafe.image
+      if (item.cafe) {
+        return {
+          id: item.cafe.id,
+          name: item.cafe.name,
+          image: item.cafe.image
+        }
+      } else {
+        // Alternative structure if the API returns a different format
+        return {
+          id: item.id,
+          name: item.name,
+          image: item.image
+        }
       }
     })
   } catch (error) {
@@ -136,9 +147,27 @@ const toggleFavorite = async (cafeId) => {
   }
 }
 
+const setupFavoriteEventListener = () => {
+  window.addEventListener('favoriteChanged', () => {
+    // Refresh favorites when the event is triggered
+    getFavorites()
+  })
+}
+
+// Refresh favorites when navigating to this page
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/favorites') {
+      getFavorites()
+    }
+  }
+)
+
 // Fetch both user profile and favorites when the component is mounted
 onMounted(() => {
   getUserProfile()
   getFavorites()
+  setupFavoriteEventListener()
 })
 </script>
