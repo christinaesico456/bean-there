@@ -30,7 +30,11 @@ const routes = [
     name: 'SignUp',
     component: SignUp
   },
-
+  {
+  path: '/settings',
+  name: 'settings', // Or a different name if you prefer
+  component: SettingsPage // Import your SettingsPage component
+  }
 ];
 
 const router = createRouter({

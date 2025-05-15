@@ -56,6 +56,7 @@ const activeTab = ref("info");
 const router = useRouter();
 
 const logout = () => {
+  console.log('userStore.logout() called');
   // Optional: clear auth token, user store, etc.
   router.push("/login");
 };

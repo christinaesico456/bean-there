@@ -191,10 +191,7 @@ onMounted(() => {
           <a href="#about" class="text-[#5B3926] hover:text-[#A67C52] font-semibold transition duration-300">About</a>
         </div>
 
-    <!-- Search Bar -->
-        <div class="relative">
-          <input type="text" placeholder="Search" class="px-4 py-2 text-sm border rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-[#5B3926]">
-        </div>
+    
         </div>
         </nav>
 
