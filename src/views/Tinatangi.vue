@@ -11,12 +11,17 @@ import { useUserStore } from '@/stores/user';
 
 const router = useRouter();
 const userStore = useUserStore();
-const CAFE_ID = 1; // This should be dynamic if possible
 
 const images = [
-  "/g1.jpg",
-  "/g2.jpg",
-  "/g3.jpg",
+  "/img1.jpg",
+  "/img2.jpg",
+  "/img3.jpg",
+  "/img4.jpg",
+  "/img5.jpg",
+  "/img6.jpg",
+  "/img7.jpg",
+  "/img8.jpg",
+  "/img9.jpg",
 ];
 
 // Scroll to header on mount
@@ -30,12 +35,13 @@ onMounted(() => {
 });
 
 
-defineProps({
+const props = defineProps({
   cafe: {
     type: Object,
-    required: true
+    required: false,
+    default: () => ({ id: null })  
   }
-})
+});
 
 // Heart (favorite) logic
 const isHeartClicked = ref(false);

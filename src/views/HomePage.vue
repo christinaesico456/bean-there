@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import axios from 'axios';
 
@@ -13,7 +13,8 @@ import bfc from '/bfc.jpg';
 
 const router = useRouter();
 const userStore = useUserStore();
-const searchQuery = ref("");
+
+const searchQuery = ref('');
 const showLoginMessage = ref(false);
 const showFeedbackForm = ref(false);
 
@@ -25,14 +26,14 @@ const feedbackSuccess = ref(false);
 const feedbackFormError = ref('');
 
 const cafes = ref([
-  { name: "Tinatangi Café", img: tinatangi, route: "/tinatangi" },
-  { name: "Someday Brews", img: somedays, route: "/someday-brews" },
-  { name: "He Brews She Bakes", img: hbsb, route: "/he-brews-she-bakes" },
-  { name: "But First Coffee", img: bfc, route: "/but-first-coffee" }
+  { id: 1, name: "Tinatangi Café", image: tinatangi, route: "/tinatangi" },
+  { id: 2, name: "Someday Brews", image: somedays, route: "/someday-brews" },
+  { id: 3, name: "He Brews She Bakes", image: hbsb, route: "/he-brews-she-bakes" },
+  { id: 4, name: "But First Coffee", image: bfc, route: "/but-first-coffee" }
 ]);
-const filteredCafes = ref([]);  // Make filteredCafes reactive
 
-// Feedback data
+const filteredCafes = ref([...cafes.value]);
+
 const feedbacks = ref([]);
 const isLoadingFeedback = ref(false);
 const feedbackError = ref('');
@@ -41,27 +42,20 @@ async function fetchCafes() {
   try {
     const response = await fetch(`http://127.0.0.1:8000/cafes/?search=${searchQuery.value}`);
     const data = await response.json();
-    cafes.value = data.results || [];  // Assign cafes from response
-    console.log(cafes.value);  // Log the cafes to check the data
-    filterCafe();  // Immediately filter cafes after fetching them
+    cafes.value = data.results || cafes.value;
+    filterCafe();
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error fetching cafes:', error);
   }
 }
 
-// Fetch feedback function
 async function fetchFeedbacks() {
   isLoadingFeedback.value = true;
   try {
     const response = await fetch('http://127.0.0.1:8000/reviews/');
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch feedback');
-    }
-    
+    if (!response.ok) throw new Error('Failed to fetch feedback');
     const data = await response.json();
-    feedbacks.value = data.results || data; // Depending on API response format
-    
+    feedbacks.value = data.results || data;
   } catch (error) {
     console.error('Error fetching feedback:', error);
     feedbackError.value = 'Unable to load feedback. Please try again later.';
@@ -72,15 +66,14 @@ async function fetchFeedbacks() {
 
 function filterCafe() {
   filteredCafes.value = cafes.value.filter(cafe =>
-    JSON.stringify(cafe).toLowerCase().includes(searchQuery.value.toLowerCase())
+    cafe.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 }
 
-// Watch for changes in searchQuery and update filteredCafes
-watch(searchQuery, (newQuery) => {
-  filterCafe();      // Update filtered cafes
-  fetchCafes();      // Fetch cafes again based on the new query
-  scrollToDirectory(); // Scroll to Café Directory
+watch(searchQuery, () => {
+  filterCafe();
+  fetchCafes();
+  scrollToDirectory();
 });
 
 onMounted(() => {
@@ -88,114 +81,81 @@ onMounted(() => {
   fetchFeedbacks();
 });
 
-// Modified function to correctly check login status
 const goToLogin = () => {
   if (userStore.isLoggedIn) {
-    // Show the feedback form instead of redirecting
     showFeedbackForm.value = true;
-    
-    // Smooth scroll to the feedback form section
     setTimeout(() => {
-      const feedbackFormElement = document.getElementById("feedback-form");
-      if (feedbackFormElement) {
-        feedbackFormElement.scrollIntoView({ behavior: 'smooth' });
-      }
+      const el = document.getElementById("feedback-form");
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   } else {
     router.push('/login');
   }
 };
 
-// Add a function to submit feedback
 const submitFeedback = async () => {
   if (!selectedCafe.value) {
     feedbackFormError.value = 'Please select a café';
     return;
   }
-  
   if (!cafeComment.value.trim()) {
     feedbackFormError.value = 'Please enter your feedback';
     return;
   }
-  
+
   submittingFeedback.value = true;
   feedbackFormError.value = '';
-  
+
   try {
     const response = await axios.post('http://127.0.0.1:8000/reviews/', {
       cafe: selectedCafe.value,
       rating: cafeRating.value,
       comment: cafeComment.value
     }, {
-      headers: {
-        'Authorization': `Token ${userStore.token}`
-      }
+      headers: { 'Authorization': `Token ${userStore.token}` }
     });
-    
-    console.log('Feedback submitted:', response.data);
     feedbackSuccess.value = true;
     cafeComment.value = '';
     cafeRating.value = 5;
     selectedCafe.value = null;
-    
-    // Refresh feedbacks list
     fetchFeedbacks();
-    
-    // Hide the form after submission
+
     setTimeout(() => {
       showFeedbackForm.value = false;
       feedbackSuccess.value = false;
     }, 3000);
-    
+
   } catch (error) {
-    console.error('Error submitting feedback:', error);
     feedbackFormError.value = error.response?.data?.detail || 'Failed to submit feedback. Please try again.';
   } finally {
     submittingFeedback.value = false;
   }
 };
 
-
 const handleProfileClick = () => {
-  console.log('User token:', userStore.token); // Debug log
-  // Log all route names known by router
-  console.log('All route names:', router.getRoutes().map(r => r.name));
   if (userStore.token) {
-    // User is logged in, redirect to profile
     router.push({ name: 'userProfile' });
   } else {
-    // User is not logged in
     showLoginMessage.value = true;
     setTimeout(() => {
       showLoginMessage.value = false;
       router.push({ name: 'login' });
-    }, 2000); 
+    }, 2000);
   }
 };
 
-defineExpose({
-  handleProfileClick,
-  goToLogin
-});
-
 function scrollToDirectory() {
   const section = document.getElementById("cafe-directory");
-  if (section) {
-    section.scrollIntoView({ behavior: 'smooth' });
-  }
+  if (section) section.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Format date helper function
 function formatDate(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  });
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+defineExpose({ handleProfileClick, goToLogin });
 </script>
 
 <template>
@@ -349,9 +309,9 @@ function formatDate(dateString) {
             <span v-for="i in feedback.rating" :key="i">★</span>
             <span v-for="i in 5 - feedback.rating" :key="i + 5" class="text-gray-300">★</span>
           </div>
-          <h3 class="font-semibold">{{ feedback.cafe || 'Café' }}</h3>
+          <h3 class="font-semibold">{{ feedback.cafe}}</h3>
         </div>
-        <p class="mb-2 text-sm text-gray-500">{{ feedback.user_name || 'Customer' }}</p>
+        <p class="mb-2 text-sm text-gray-500">{{ feedback.user}}</p>
         <p>{{ feedback.comment }}</p>
         <p class="mt-2 text-xs text-right text-gray-500">{{ formatDate(feedback.created_at) }}</p>
       </div>

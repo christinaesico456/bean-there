@@ -29,6 +29,14 @@ onMounted(() => {
   checkFavoriteStatus();
 });
 
+const props = defineProps({
+  cafe: {
+    type: Object,
+    required: false,
+    default: () => ({ id: null })  
+  }
+});
+
 // Heart (favorite) logic
 const isHeartClicked = ref(false);
 
@@ -237,7 +245,7 @@ const offerings = [
       </div>
 
     <!-- Café Services -->
-    <section class="py-5 bg-[#003366] text-[#ffffff] text-center">
+    <section class="py-12 bg-[#003366] text-[#ffffff] text-center">
       <h2 class="mb-6 text-4xl font-bold">Café Offerings</h2>
       <div class="relative max-w-5xl mx-auto overflow-hidden">
         <div class="flex animate-scroll-right">
@@ -246,7 +254,7 @@ const offerings = [
             :key="index"
             class="flex-shrink-0 w-64 mx-14"
           >
-            <div class="bg-[#ffffff] text-[#003366] p-8 rounded-lg shadow-lg font-semibold flex items-center justify-center h-20 text-sm">
+            <div class="bg-[#ffffff] text-[#003366] p-3 rounded-lg shadow-lg font-semibold flex items-center justify-center h-20 text-sm">
               {{ offering }}
             </div>
           </div>
@@ -276,7 +284,7 @@ const offerings = [
       class="w-full max-w-6xl"
     >
       <SwiperSlide v-for="(image, index) in images" :key="index" class="flex justify-center">
-        <img :src="image" class="w-full h-[500px] object-cover rounded-lg shadow-xl" />
+        <img :src="image" class="w-full h-[600px] object-cover rounded-lg shadow-xl" />
       </SwiperSlide>
       </Swiper>
       </div>

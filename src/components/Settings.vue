@@ -46,19 +46,19 @@ const saveChanges = async () => {
   try {
     const response = await axios.put('http://127.0.0.1:8000/accounts/profile/', {
       bio: bio.value,
-      profile_picture: profilePicture.value,  
+      profile_picture: profilePicture.value,
     }, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${userStore.token}` 
-      }
-    })
+        'Authorization': `Token ${userStore.token}`
+  }
+  })
 
     // Update the user data in the store
     userStore.setUser({
       ...userStore.user,
       bio: bio.value,
-      profilePicture: profilePicture.value
+       profilePicture: response.data.profile_picture
     })
     
     successMessage.value = 'Profile updated successfully!'

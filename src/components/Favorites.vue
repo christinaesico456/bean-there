@@ -69,11 +69,13 @@
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
+import { useCafeStore } from '@/stores/cafefavorites'
 
 const user = ref({ name: '' })
 const favoriteCafes = ref([])
 const loading = ref(true)
 const route = useRoute()
+const cafeStore = useCafeStore()
 
 // ✅ Axios config with base URL and token
 const api = axios.create({

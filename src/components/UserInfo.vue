@@ -170,7 +170,7 @@ const handleFileUpload = async (event) => {
         user.value.profilePicture = responseData.data.profile_picture;
         userStore.setUser({
           ...userStore.user,
-          profilePicture: responseData.data.profile_picture
+          profilePicture: responseData.profile_picture
         });
         
         // Show success message

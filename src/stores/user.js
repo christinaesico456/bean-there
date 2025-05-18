@@ -24,16 +24,17 @@ export const useUserStore = defineStore('user', () => {
 
   // Set user data
   const setUser = (userData) => {
-    user.value = {
-      firstName: userData.first_name || '',
-      lastName: userData.last_name || '',
-      email: userData.email || '',
-      phone: userData.phone_number || '',
-      bio: userData.bio || '',
-      profilePicture: userData.profile_picture || '',
-      username: userData.username || ''
-    }
+  user.value = {
+    firstName: userData.first_name || userData.firstName || '',
+    lastName: userData.last_name || userData.lastName || '',
+    email: userData.email || '',
+    phone: userData.phone_number || userData.phone || '',
+    bio: userData.bio || '',
+    profilePicture: userData.profile_picture || userData.profilePicture || '',
+    username: userData.username || ''
   }
+}
+
 
   // Set authentication token
   const setToken = (newToken) => {
